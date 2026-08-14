@@ -1,0 +1,22 @@
+{
+  "name": "cv-builder",
+  "version": "1.0.0",
+  "description": "CV Builder — UK school-leaver CV builder with AI generation and Lemon Squeezy licensing",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test \"test/**/*.test.js\""
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "mammoth": "^1.12.1",
+    "multer": "^2.2.0",
+    "pdf-parse": "^2.4.5"
+  }
+}

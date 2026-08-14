@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CV Builder — Build a job-winning CV in minutes</title>
+<style>
+  :root{
+    --ink:#16324f; --ink-soft:#3d4d5e; --ink-faint:#7b8794;
+    --accent:#1d63b8; --accent-dark:#164e91; --ok:#1e7d4f; --ok-bg:#e9f6ef;
+    --bg:#f4f7fb; --card:#fff; --line:#dce3ec;
+  }
+  *{margin:0; padding:0; box-sizing:border-box;}
+  body{font-family:'Segoe UI', system-ui, -apple-system, Arial, sans-serif; color:var(--ink-soft); background:var(--card);}
+  a{text-decoration:none;}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 20px;}
+
+  /* nav */
+  .nav{border-bottom:1px solid var(--line); background:var(--card); position:sticky; top:0; z-index:10;}
+  .nav .wrap{display:flex; align-items:center; justify-content:space-between; height:60px;}
+  .logo{font-size:1.15rem; font-weight:800; color:var(--ink);}
+  .logo span{color:var(--accent);}
+  .btn{display:inline-block; background:var(--accent); color:#fff; border:1px solid var(--accent);
+       border-radius:8px; padding:10px 22px; font-weight:700; font-size:.9rem; cursor:pointer; transition:background .15s;}
+  .btn:hover{background:var(--accent-dark);}
+  .btn.big{padding:15px 34px; font-size:1.05rem; border-radius:10px;}
+  .btn.ghost{background:transparent; color:var(--accent);}
+
+  /* hero */
+  .hero{background:linear-gradient(180deg, var(--bg), #fff); padding:64px 0 48px; text-align:center;}
+  .hero h1{font-size:2.5rem; line-height:1.15; color:var(--ink); max-width:760px; margin:0 auto 16px;}
+  .hero p{font-size:1.1rem; max-width:620px; margin:0 auto 26px;}
+  .trust{margin-top:18px; font-size:.85rem; color:var(--ink-faint);}
+  .trust b{color:var(--ok);}
+
+  /* template chooser */
+  .choose{padding:56px 0 30px; background:#fff;}
+  .choose h2, .steps h2{font-size:1.7rem; color:var(--ink); text-align:center; margin-bottom:8px;}
+  .choose .sub, .steps .sub{text-align:center; margin-bottom:34px; color:var(--ink-faint);}
+  .tpl-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:26px;}
+  .tpl-card{border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--card);
+            transition:box-shadow .15s, transform .15s; display:flex; flex-direction:column;}
+  .tpl-card:hover{box-shadow:0 8px 26px rgba(20,40,70,.14); transform:translateY(-3px);}
+  .thumb{height:250px; background:#fff; border-bottom:1px solid var(--line); padding:16px; overflow:hidden; position:relative;}
+  .tpl-card .meta{padding:14px 16px 18px; text-align:center;}
+  .tpl-card .meta .name{font-weight:700; color:var(--ink); margin-bottom:10px;}
+  /* generic thumbnail atoms */
+  .t-name{height:11px; width:55%; background:#22384c; border-radius:2px; margin-bottom:6px;}
+  .t-line{height:5px; background:#cdd6e0; border-radius:2px; margin-bottom:5px;}
+  .t-line.short{width:65%;}
+  .t-sec{height:7px; width:40%; background:#8fa3b8; border-radius:2px; margin:10px 0 6px;}
+  /* per-template thumbnail flavours */
+  .thumb.classic .t-name{background:#16324f;}
+  .thumb.classic .t-sec{background:#16324f; border-bottom:1px solid #16324f;}
+  .thumb.modern .t-name{background:#0e7490;}
+  .thumb.modern .t-sec{background:#0e7490;}
+  .thumb.minimal .t-name{background:#222;}
+  .thumb.minimal .t-sec{background:#555;}
+  .thumb.elegant{text-align:center;}
+  .thumb.elegant .t-name{background:#6b1f2a; margin-left:auto; margin-right:auto;}
+  .thumb.elegant .t-sec{background:#6b1f2a; margin-left:auto; margin-right:auto;}
+  .thumb.sidebar{padding:0; display:flex;}
+  .thumb.sidebar .t-side{width:34%; background:#2c4258; padding:12px 8px;}
+  .thumb.sidebar .t-side .t-line{background:#5c748c;}
+  .thumb.sidebar .t-side .t-sec{background:#e9eef4; width:70%;}
+  .thumb.sidebar .t-maincol{flex:1; padding:12px 10px;}
+  .thumb.banner{padding:0;}
+  .thumb.banner .t-banner{background:#1d63b8; padding:14px 12px 10px; margin-bottom:10px;}
+  .thumb.banner .t-banner .t-name{background:#fff; margin:0 auto 4px;}
+  .thumb.banner .t-banner .t-line{background:#7fa9dd; width:50%; margin:0 auto;}
+  .thumb.banner .t-bodycol{padding:0 12px;}
+
+  /* steps */
+  .steps{background:var(--bg); padding:56px 0;}
+  .steps-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:26px;}
+  .step-card{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:24px;}
+  .step-card .num{width:34px; height:34px; border-radius:50%; background:var(--accent); color:#fff;
+                  font-weight:800; display:flex; align-items:center; justify-content:center; margin-bottom:12px;}
+  .step-card h3{color:var(--ink); margin-bottom:8px; font-size:1.05rem;}
+  .step-card p{font-size:.9rem; line-height:1.5;}
+
+  /* features + cta */
+  .features{padding:52px 0; text-align:center;}
+  .features ul{list-style:none; display:flex; flex-wrap:wrap; gap:14px 30px; justify-content:center; margin-top:18px;}
+  .features li{font-size:.92rem;}
+  .features li::before{content:"✓ "; color:var(--ok); font-weight:800;}
+  .cta{background:var(--ink); color:#dbe4ee; text-align:center; padding:56px 20px;}
+  .cta h2{color:#fff; font-size:1.6rem; margin-bottom:10px;}
+  .cta p{margin-bottom:22px;}
+  .badge{display:inline-block; background:var(--ok-bg); color:var(--ok); border:1px solid var(--ok);
+         border-radius:20px; padding:3px 14px; font-size:.78rem; font-weight:700; margin-bottom:14px;}
+
+  footer{border-top:1px solid var(--line); padding:18px 20px 24px; text-align:center; font-size:.8rem; color:var(--ink-faint);}
+  footer a{color:var(--accent);}
+
+  @media (max-width:640px){ .hero h1{font-size:1.8rem;} .thumb{height:200px;} }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap">
+    <div class="logo">CV<span>Builder</span></div>
+    <a class="btn" href="/app">Create my CV</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="badge">Free during beta</div>
+    <h1>Build a job-winning CV in minutes — honest, UK-format, school-leaver friendly</h1>
+    <p>Answer five short steps, watch your CV build itself live, then export it as PDF or Word.
+       AI polishes your wording using strict no-invention rules — it never makes anything up.</p>
+    <a class="btn big" href="#chooseTemplate">Choose your template</a>
+    <div class="trust"><b>✓</b> No photo, no waffle, no fabricated buzzwords — just the CV UK recruiters expect.</div>
+  </div>
+</section>
+
+<section class="choose" id="chooseTemplate">
+  <div class="wrap">
+    <h2>Choose your CV template</h2>
+    <p class="sub">Pick a design to start with — you can switch templates any time and your content stays put.</p>
+    <div class="tpl-grid">
+
+      <div class="tpl-card">
+        <div class="thumb classic">
+          <div class="t-name"></div><div class="t-line short"></div>
+          <div class="t-sec"></div><div class="t-line"></div><div class="t-line"></div><div class="t-line short"></div>
+          <div class="t-sec"></div><div class="t-line"></div><div class="t-line short"></div>
+          <div class="t-sec"></div><div class="t-line"></div><div class="t-line"></div>
+        </div>
+        <div class="meta"><div class="name">Classic</div><a class="btn" href="/app?template=classic">Use this template</a></div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="thumb modern">
+          <div class="t-name"></div><div class="t-line short"></div>
+          <div class="t-sec"></div><div class="t-line"></div><div class="t-line"></div><div class="t-line short"></div>
+          <div class="t-sec"></div><div class="t-line"></div><div class="t-line short"></div>
+          <div class="t-sec"></div><div class="t-line"></div><div class="t-line"></div>
+        </div>
+        <div class="meta"><div class="name">Modern</div><a class="btn" href="/app?template=modern">Use this template</a></div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="thumb minimal">
+          <div class="t-name"></div><div class="t-line short"></div>
+          <div class="t-sec"></div><div class="t-line"></div><div class="t-line"></div><div class="t-line short"></div>
+          <div class="t-sec"></div><div class="t-line"></div><div class="t-line short"></div>
+          <div class="t-sec"></div><div class="t-line"></div><div class="t-line"></div>
+        </div>
+        <div class="meta"><div class="name">Minimal <span style="font-weight:400;color:var(--ink-faint)">(ATS-safe)</span></div><a class="btn" href="/app?template=minimal">Use this template</a></div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="thumb elegant">
+          <div class="t-name"></div><div class="t-line short" style="margin:0 auto 5px;"></div>
+          <div class="t-sec"></div><div class="t-line"></div><div class="t-line"></div><div class="t-line short" style="margin:0 auto 5px;"></div>
+          <div class="t-sec"></div><div class="t-line"></div><div class="t-line"></div>
+        </div>
+        <div class="meta"><div class="name">Elegant</div><a class="btn" href="/app?template=elegant">Use this template</a></div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="thumb sidebar">
+          <div class="t-side">
+            <div class="t-sec"></div><div class="t-line"></div><div class="t-line"></div>
+            <div class="t-sec"></div><div class="t-line"></div><div class="t-line"></div>
+          </div>
+          <div class="t-maincol">
+            <div class="t-name"></div><div class="t-line short"></div>
+            <div class="t-sec"></div><div class="t-line"></div><div class="t-line"></div>
+            <div class="t-sec"></div><div class="t-line"></div><div class="t-line short"></div>
+          </div>
+        </div>
+        <div class="meta"><div class="name">Sidebar</div><a class="btn" href="/app?template=sidebar">Use this template</a></div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="thumb banner">
+          <div class="t-banner"><div class="t-name" style="width:60%"></div><div class="t-line"></div></div>
+          <div class="t-bodycol">
+            <div class="t-sec"></div><div class="t-line"></div><div class="t-line"></div><div class="t-line short"></div>
+            <div class="t-sec"></div><div class="t-line"></div><div class="t-line short"></div>
+          </div>
+        </div>
+        <div class="meta"><div class="name">Banner</div><a class="btn" href="/app?template=banner">Use this template</a></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="steps">
+  <div class="wrap">
+    <h2>How it works</h2>
+    <p class="sub">Three steps from blank page to application-ready.</p>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="num">1</div>
+        <h3>Pick a template</h3>
+        <p>Choose a design above — or import your existing CV (PDF, Word or text) and we'll fill the form for you automatically.</p>
+      </div>
+      <div class="step-card">
+        <div class="num">2</div>
+        <h3>Fill five short steps</h3>
+        <p>Basics, education, projects, experience, interests. AI suggests ideas suited to the job you're after and can write entries from your rough notes — only ever from facts you give it.</p>
+      </div>
+      <div class="step-card">
+        <div class="num">3</div>
+        <h3>Export &amp; apply</h3>
+        <p>Download as PDF or Word in your chosen template, plus an honest gap assessment and three concrete actions to strengthen your next application.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="features">
+  <div class="wrap">
+    <h2 style="color:var(--ink); font-size:1.5rem;">Built for UK school leavers</h2>
+    <ul>
+      <li>UK format — no photo, no date of birth</li>
+      <li>Strict no-invention AI rules</li>
+      <li>Tailors wording to the role you pick</li>
+      <li>Live A4 preview as you type</li>
+      <li>Nothing stored — GDPR-friendly</li>
+      <li>Free while in beta</li>
+    </ul>
+  </div>
+</section>
+
+<section class="cta">
+  <h2>Your next application deserves a better CV</h2>
+  <p>Start now — it's free during beta, and your data never leaves your browser except to generate your CV.</p>
+  <a class="btn big" href="/app">Create my CV</a>
+</section>
+
+<footer>
+  CV Builder · <a href="/privacy">Privacy</a> · Your CV data is processed in memory to generate output — never stored, never used for training.
+</footer>
+
+</body>
+</html>
