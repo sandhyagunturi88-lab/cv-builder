@@ -462,7 +462,13 @@ function createApp(options = {}) {
   // Feature discovery: the front end asks what optional features this deploy
   // has. Ungated and free — it reveals configuration, never data.
   app.get('/api/features', (req, res) => {
-    res.json({ keywordGap: !!config.jobpilotApiUrl });
+    res.json({
+      keywordGap: !!config.jobpilotApiUrl,
+      // Lets the front end grey out (lock) AI buttons for unlicensed visitors
+      // when AI is paid-only, and link them straight to checkout.
+      beta: !!config.betaMode,
+      checkoutUrl: config.checkoutUrl,
+    });
   });
 
   // Role keyword gap: pulls a corpus of real ingested job adverts for the
@@ -753,7 +759,7 @@ function createApp(options = {}) {
         .map((l) => l.trim())
         .find((l) => l.length <= 60 && /^[A-Za-z][A-Za-z']*(?:[ -][A-Za-z][A-Za-z']*){1,3}$/.test(l)) || '';
     return {
-      name, city: '', email, phone, links,
+      name, dob: '', address: '', email, phone, links, profile: '',
       school: '', schooldates: '', gcse: '', qualifications: [], projects: [],
       quant: '', skills: '', jobs: [], responsibility: '', sport: '',
       fitness: '', awards: '', interests: '',

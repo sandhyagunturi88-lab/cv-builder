@@ -908,7 +908,7 @@ test('keyword gap is hidden without JOBPILOT_API_URL and served with it', async 
   // Standalone deploy: feature flag off, route unavailable
   const bare = await startApp({ betaMode: true });
   t.after(() => bare.server.close());
-  assert.deepEqual(await (await fetch(`${bare.base}/api/features`)).json(), { keywordGap: false });
+  assert.deepEqual(await (await fetch(`${bare.base}/api/features`)).json(), { keywordGap: false, beta: true, checkoutUrl: 'https://teststore.lemonsqueezy.com/buy/abc-123' });
   const off = await fetch(`${bare.base}/api/keyword-gap`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -940,7 +940,7 @@ test('keyword gap is hidden without JOBPILOT_API_URL and served with it', async 
     corpusFetch,
   });
   t.after(() => on.server.close());
-  assert.deepEqual(await (await fetch(`${on.base}/api/features`)).json(), { keywordGap: true });
+  assert.deepEqual(await (await fetch(`${on.base}/api/features`)).json(), { keywordGap: true, beta: true, checkoutUrl: 'https://teststore.lemonsqueezy.com/buy/abc-123' });
 
   const res = await fetch(`${on.base}/api/keyword-gap`, {
     method: 'POST',

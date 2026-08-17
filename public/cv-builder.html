@@ -201,6 +201,12 @@
   }
   .pm-btn.active{background:var(--accent); border-color:var(--accent); color:#fff;}
   .pm-btn.pm-tpl{flex:0 0 auto; background:#fff; color:var(--accent); border-color:var(--accent-mid);}
+  /* Paid-only deploys: AI buttons stay visible as the upsell but greyed with a
+     padlock; clicking one opens the subscribe panel instead of calling the API. */
+  .ai-locked{opacity:.55; filter:grayscale(.4);}
+  .ai-locked::after{content:" 🔒";}
+  .pm-btn.pm-unlock{flex:0 0 auto; display:none; background:var(--accent); border-color:var(--accent); color:#fff;}
+  .pm-btn.pm-unlock.show{display:inline-block;}
 
   /* ---------- template picker: slide-in drawer over the form pane ----------
      No backdrop — the live CV preview stays visible (and updating) on the
@@ -851,6 +857,7 @@
       <button class="pm-btn" id="pmTailor" onclick="setPane('tailor')" title="Sharpen your CV for one specific job advert">🎯 Match a job</button>
       <button class="pm-btn" id="pmReview" onclick="setPane('review')" title="Honest gaps in your CV and concrete actions to close them">🧭 Honest review</button>
       <button class="pm-btn" id="pmInterview" onclick="setPane('interview')" title="Practise a realistic interview for your target role">🎤 Mock interview</button>
+      <button class="pm-btn pm-unlock" id="pmUnlock" onclick="openSubscribe()" title="Unlock every ✨ AI feature — £4.99/month, cancel any time">🔓 Unlock AI · £4.99/mo</button>
     </div>
 
     <div class="tpl-modal" id="tplModal">
@@ -2505,6 +2512,9 @@ function useLicenseKey(){
   licenseKey = v("f_licensekey");
   if(!licenseKey){ $("upgradeMsg").textContent="Paste your licence key first."; return; }
   $("upgradeMsg").textContent="";
+  // A key is now in play — drop the locked styling. If the key turns out to be
+  // invalid, the next AI call 402s and reopens this panel with the error.
+  setAILocked(false);
   (upgradeRetry || generateAI)();
 }
 async function generateAI(){
@@ -2765,8 +2775,14 @@ function applyImport(raw, usedAI=true, upgradeAvailable=false){
   // Fill only what's empty — anything already typed is never overwritten.
   const setIfEmpty=(id,val)=>{ if(val && typeof val==="string" && !v(id)) $(id).value=val.trim(); };
   setIfEmpty("f_name",obj.name);
+  // f_dob is a native date input — only accept a well-formed ISO date, so a
+  // malformed value never gets silently dropped by the input vs. left for
+  // the user to notice was skipped.
+  if(typeof obj.dob==="string" && /^\d{4}-\d{2}-\d{2}$/.test(obj.dob.trim())) setIfEmpty("f_dob",obj.dob);
+  setIfEmpty("f_address",obj.address);
   setIfEmpty("f_email",obj.email); setIfEmpty("f_phone",obj.phone);
-  setIfEmpty("f_links",obj.links); setIfEmpty("f_school",obj.school);
+  setIfEmpty("f_links",obj.links); setIfEmpty("f_profile",obj.profile);
+  setIfEmpty("f_school",obj.school);
   setIfEmpty("f_schooldates",obj.schooldates); setIfEmpty("f_gcse",obj.gcse);
   setIfEmpty("f_quant",obj.quant); setIfEmpty("f_skills",obj.skills);
   setIfEmpty("f_responsibility",obj.responsibility); setIfEmpty("f_football",obj.sport);
@@ -3330,8 +3346,39 @@ async function initExtras(){
     const resp = await fetchTimeout("/api/features");
     const feats = await resp.json();
     if(feats && feats.keywordGap) $("kwgapField").style.display="block";
+    if(feats){
+      serverCheckoutUrl = feats.checkoutUrl || "";
+      // Paid-only deploy and no key yet: grey the AI buttons (visible upsell)
+      // and surface the Unlock AI tab. Beta deploys stay fully open.
+      if(!feats.beta && !licenseKey) setAILocked(true);
+    }
   }catch(e){ /* offline / plain-file mode: optional features stay hidden */ }
 }
+
+/* ---------- paid-only lock: grey AI buttons, route clicks to subscribe ---------- */
+let aiLocked = false;
+let serverCheckoutUrl = "";
+const AI_LOCK_IDS = ["btnAI","btnSuggest","btnPolish3","btnPolish4","btnPolish5","btnTailor","btnKwGap","btnInterview","btnIvSend"];
+function setAILocked(on){
+  aiLocked = on;
+  AI_LOCK_IDS.forEach(id=>{ const el=$(id); if(el) el.classList.toggle("ai-locked", on); });
+  $("pmUnlock").classList.toggle("show", on);
+}
+function openSubscribe(){
+  // No blocked action to resume — the retry is a no-op so pasting a key never
+  // fires an AI call the visitor didn't ask for.
+  showUpgrade(serverCheckoutUrl, "", ()=>{});
+}
+// Wrap every paid AI entry point: while locked, a click opens the subscribe
+// panel straight away (no server round-trip, no cold-start wait). Once a key
+// is pasted the wrapper falls through to the real handler.
+["generateAI","suggestAI","polishAI","tailorAI","keywordGapAI","startInterview","sendInterviewAnswer"].forEach((name)=>{
+  const orig = window[name];
+  window[name] = function(...args){
+    if(aiLocked){ showUpgrade(serverCheckoutUrl, "", ()=>window[name](...args)); return; }
+    return orig.apply(this, args);
+  };
+});
 
 /* ================= init ================= */
 // Force every tracked field blank if we just landed here via "Clear & start
