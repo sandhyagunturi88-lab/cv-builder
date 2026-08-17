@@ -567,8 +567,13 @@
   .iv-a{background:#eafaf1; align-self:flex-end;}
   .iv-fb{background:#fdf6e3; align-self:flex-start; font-size:12.5px;}
   .iv-score{font-weight:800;}
-  .upgrade-panel{border-color:var(--warn) !important; background:var(--warn-bg) !important;}
-  .upgrade-panel h2{color:var(--warn) !important;}
+  /* Subscribe popup: centred modal over a dimmed backdrop, in the app's
+     normal palette (accent heading, standard card + ink colours). */
+  .upgrade-modal{position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; background:rgba(10,25,45,.45); padding:20px;}
+  .upgrade-modal.show{display:flex;}
+  .upgrade-panel{max-width:560px; width:100%; margin:0; position:relative; box-shadow:0 12px 48px rgba(10,25,45,.35);}
+  .upgrade-panel h2{color:var(--accent);}
+  .upgrade-panel .ip-close{position:absolute; top:12px; right:14px; border:none; background:none; color:var(--ink-faint); cursor:pointer; font-size:1rem; padding:4px;}
   .upgrade-panel .field{margin-top:12px;}
 
   /* ---------- Footer ---------- */
@@ -581,7 +586,7 @@
   /* ---------- Print: only the CV ---------- */
   @media print{
     body{background:#fff;}
-    header.app-header, .intro-strip, .pane-form, .export-bar, .gaps-panel, .stepper, .ai-wrap, .site-footer, .view-toggle, .edit-bar, .pane-menu, .info-pop, .preview-controls, .tpl-modal, .form-toggle{display:none !important;}
+    header.app-header, .intro-strip, .pane-form, .export-bar, .gaps-panel, .stepper, .ai-wrap, .upgrade-modal, .site-footer, .view-toggle, .edit-bar, .pane-menu, .info-pop, .preview-controls, .tpl-modal, .form-toggle{display:none !important;}
     .a4.editing{outline:none;}
     .layout{display:block; min-height:0;}
     .pane-preview{padding:0; background:#fff; border:none; overflow:visible;}
@@ -997,9 +1002,10 @@
     <!-- Not gated by setPane's per-pane show/hide: a 402 can happen from the Tailor,
          Import or Keyword-gap panes too, and the subscribe card must still be reachable
          there — see showUpgrade(). -->
-    <div class="ai-wrap" id="upgradeWrap">
-      <div class="card upgrade-panel" id="upgradePanel" style="display:none">
-        <h2>Subscribe to use AI generation</h2>
+    <div class="upgrade-modal" id="upgradeWrap" onclick="if(event.target===this)closeUpgrade()">
+      <div class="card upgrade-panel" id="upgradePanel" role="dialog" aria-modal="true" aria-labelledby="upgradeTitle">
+        <button class="ip-close" onclick="closeUpgrade()" title="Close">✕</button>
+        <h2 id="upgradeTitle">Subscribe to use AI generation</h2>
         <p class="hint" style="margin-bottom:0">AI generation needs an active subscription — <b>£4.99/month, cancel any time</b>. Subscribe to get a licence key by email, then paste it below — it's kept only in this tab and never saved. Building, previewing and PDF/Word export stay free without one.</p>
         <div class="preview-toolbar" style="margin-top:12px">
           <a class="btn" id="subscribeLink" href="#" target="_blank" rel="noopener">Subscribe</a>
@@ -2457,7 +2463,7 @@ function showAIMessage(msg, isErr){
 }
 function showAIResult(text){
   lastAIResult = text;
-  $("upgradePanel").style.display="none";
+  closeUpgrade();
   $("aiPanel").style.display="block";
   $("aiMsg").textContent=""; $("aiMsg").classList.remove("err");
   const out=$("aiOutput"); out.textContent=text; out.style.display="block";
@@ -2498,22 +2504,26 @@ function renderNextActions(md){
 let upgradeRetry = null; // the blocked action "Use key" should resume, once a key is accepted
 function showUpgrade(checkoutUrl, msg, retryFn){
   $("aiPanel").style.display="none";
-  const p=$("upgradePanel"); p.style.display="block";
+  $("upgradeWrap").classList.add("show");
   // Only ever point the link at an https:// URL the server gave us — never let an
   // unexpected response value (or its absence) turn this into a javascript: link.
   if(checkoutUrl && /^https:\/\//i.test(checkoutUrl)) $("subscribeLink").href=checkoutUrl;
   else $("subscribeLink").removeAttribute("href");
   $("upgradeMsg").textContent = msg||"";
   upgradeRetry = retryFn || generateAI;
-  p.scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+function closeUpgrade(){
+  $("upgradeWrap").classList.remove("show");
 }
 function useLicenseKey(){
   licenseKey = v("f_licensekey");
   if(!licenseKey){ $("upgradeMsg").textContent="Paste your licence key first."; return; }
   $("upgradeMsg").textContent="";
-  // A key is now in play — drop the locked styling. If the key turns out to be
-  // invalid, the next AI call 402s and reopens this panel with the error.
+  // A key is now in play — drop the locked styling and close the popup. If the
+  // key turns out to be invalid, the next AI call 402s and reopens it with the
+  // error message.
   setAILocked(false);
+  closeUpgrade();
   (upgradeRetry || generateAI)();
 }
 async function generateAI(){
@@ -3142,6 +3152,7 @@ function closeTplModal(){
 document.addEventListener("keydown", e=>{
   if(e.key==="Escape"){
     closeTplModal();
+    closeUpgrade();
     document.querySelectorAll(".info-pop.show").forEach(p=>p.classList.remove("show"));
   }
 });

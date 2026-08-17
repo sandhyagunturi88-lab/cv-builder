@@ -1765,7 +1765,7 @@ test('stop_reason failure in keyword-gap\'s diff call (not the extraction call) 
 
 test('import-cv extracts a BTEC and a predicted GCSE into the qualifications array', async (t) => {
   const extraction = {
-    name: 'Sam Example', city: 'Leeds', email: 'sam@example.com', phone: '', links: '',
+    name: 'Sam Example', dob: '', address: 'Leeds', email: 'sam@example.com', phone: '', links: '', profile: '',
     school: 'Leeds City College', schooldates: '2024 – 2026', gcse: '',
     qualifications: [
       { level: 'BTEC', subject: 'Applied Science', grade: 'Distinction', predicted: false },
