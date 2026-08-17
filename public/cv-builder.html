@@ -193,11 +193,12 @@
   .tpl-card.sel .tpl-name{color:var(--accent);}
 
   /* ---------- Preview pane menu (CV / review / interview) ---------- */
-  .pane-menu{max-width:760px; margin:0 auto 14px; display:flex; gap:8px; flex-wrap:wrap;}
+  .pane-menu{max-width:760px; margin:0 auto 14px; display:flex; gap:6px; flex-wrap:wrap;}
   .pm-btn{
     flex:1; border:1.5px solid var(--line); background:var(--card); color:var(--ink-soft);
-    padding:9px 10px; font-size:.85rem; font-weight:700; cursor:pointer; font-family:inherit;
+    padding:8px 9px; font-size:.78rem; font-weight:700; cursor:pointer; font-family:inherit;
     border-radius:10px; transition:all .15s;
+    white-space:nowrap; /* one line per label — mixed heights read as clutter */
   }
   .pm-btn.active{background:var(--accent); border-color:var(--accent); color:#fff;}
   .pm-btn.pm-tpl{flex:0 0 auto; background:#fff; color:var(--accent); border-color:var(--accent-mid);}
