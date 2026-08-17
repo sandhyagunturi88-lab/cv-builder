@@ -12,7 +12,7 @@
     "node": ">=18.17"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.39.0",
+    "@anthropic-ai/sdk": "^0.117.1",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "mammoth": "^1.12.1",

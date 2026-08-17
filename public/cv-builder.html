@@ -6,7 +6,7 @@
 <title>School-Leaver CV Builder — UK Format</title>
 <style>
   :root{
-    --ink:#1a2332; --ink-soft:#4a5568; --ink-faint:#8a94a6;
+    --ink:#1a2332; --ink-soft:#4a5568; --ink-faint:#667080;
     --accent:#1f4e79; --accent-light:#e8eff7; --accent-mid:#9dbbd8;
     --bg:#f2f4f8; --card:#ffffff; --line:#dde3ec;
     --warn:#b7791f; --warn-bg:#fdf6e3; --ok:#2f7d5a; --ok-bg:#e9f5ef;
@@ -18,23 +18,41 @@
     background:var(--bg); color:var(--ink); line-height:1.5; font-size:15px;
   }
   header.app-header{
-    background:linear-gradient(135deg, #1f4e79 0%, #2d6aa0 100%);
-    color:#fff; padding:22px 32px;
+    background:var(--accent);
+    color:#fff; padding:20px 32px; text-align:center;
   }
-  header.app-header h1{font-size:1.35rem; font-weight:600; letter-spacing:.2px;}
-  header.app-header p{font-size:.85rem; opacity:.85; margin-top:4px; max-width:900px;}
+  header.app-header h1{font-size:1.75rem; font-weight:700; letter-spacing:.4px;}
+  .intro-strip{
+    background:#fff; border-bottom:1px solid var(--line);
+    padding:9px 28px; font-size:.83rem; color:var(--ink-soft); text-align:center;
+  }
   .layout{display:flex; gap:0; min-height:calc(100vh - 90px);}
   .pane-form{flex:0 0 46%; max-width:640px; padding:24px 28px 60px; overflow-y:auto;}
   .pane-preview{flex:1; background:#e6eaf1; padding:24px 28px 60px; overflow-y:auto; border-left:1px solid var(--line);}
+  /* « on the pane divider collapses the form so the CV previews full-width;
+     collapsed, it docks to the left edge as » to bring the form back. */
+  body.form-collapsed .pane-form{display:none;}
+  body.form-collapsed .pane-preview{border-left:none;}
+  .form-toggle{
+    position:fixed; top:120px; left:min(46vw, 640px); transform:translateX(-50%);
+    z-index:90; width:26px; height:46px; border-radius:8px; padding:0;
+    border:1px solid var(--line); background:#fff; color:var(--accent);
+    cursor:pointer; font-size:1rem; font-weight:800; box-shadow:0 2px 8px rgba(15,30,50,.18);
+  }
+  .form-toggle:hover{background:var(--accent-light);}
+  body.form-collapsed .form-toggle{left:0; transform:none; border-radius:0 8px 8px 0;}
+  @media (max-width:980px){.form-toggle{display:none;}}
 
   /* ---------- Stepper ---------- */
-  .stepper{display:flex; gap:6px; margin-bottom:20px; flex-wrap:wrap;}
+  .stepper{display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;}
   .step-chip{
-    border:1px solid var(--line); background:var(--card); border-radius:20px;
-    padding:5px 13px; font-size:.78rem; cursor:pointer; color:var(--ink-soft);
+    flex:1; min-width:92px; text-align:center; display:block; font-family:inherit; appearance:none;
+    border:1.5px solid var(--line); background:var(--card); border-radius:10px;
+    padding:8px 10px 9px; font-size:.85rem; font-weight:700; cursor:pointer; color:var(--ink-soft);
     transition:all .15s; user-select:none;
   }
-  .step-chip.active{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .step-chip .sc-num{display:block; font-size:.66rem; font-weight:600; opacity:.7; margin-bottom:1px; letter-spacing:.5px;}
+  .step-chip.active{background:var(--accent); color:#fff; border-color:var(--accent); box-shadow:0 3px 10px rgba(31,78,121,.28);}
   .step-chip.done{border-color:var(--ok); color:var(--ok); background:var(--ok-bg);}
 
   /* ---------- Cards / fields ---------- */
@@ -44,23 +62,61 @@
   .field{margin-bottom:13px;}
   .field label{display:block; font-size:.82rem; font-weight:600; color:var(--ink-soft); margin-bottom:4px;}
   .field label .opt{font-weight:400; color:var(--ink-faint);}
-  .field input[type=text], .field input[type=email], .field textarea, .field select{
+  .field input[type=text], .field input[type=email], .field input[type=date], .field textarea, .field select{
     width:100%; padding:8px 11px; border:1px solid var(--line); border-radius:7px;
     font-size:.9rem; font-family:inherit; color:var(--ink); background:#fcfdfe;
   }
   .field textarea{resize:vertical; min-height:60px;}
+  /* Date field reads like a plain text box until you actually interact with it —
+     the picker icon only appears on hover/focus instead of sitting there always. */
+  .field input[type=date]::-webkit-calendar-picker-indicator{opacity:0; transition:opacity .12s;}
+  .field input[type=date]:hover::-webkit-calendar-picker-indicator,
+  .field input[type=date]:focus::-webkit-calendar-picker-indicator{opacity:1;}
+  .field .mini-fmt{display:flex; gap:4px; align-items:center; margin-bottom:4px;}
+  .field .mini-fmt button{
+    min-width:28px; padding:2px 7px; border:1px solid var(--line); border-radius:5px;
+    background:#fff; cursor:pointer; font-size:.85rem; color:var(--ink);
+  }
+  .field .mini-fmt button:hover{border-color:var(--accent-mid);}
+  .field .mini-fmt .opt{font-size:.82rem; font-weight:400; color:var(--ink-faint);}
+  .field .rich-input{
+    width:100%; min-height:76px; padding:8px 11px; border:1px solid var(--line); border-radius:7px;
+    font-size:.9rem; font-family:inherit; color:var(--ink); background:#fcfdfe; overflow-y:auto;
+  }
+  .field .rich-input:focus{outline:none; border-color:var(--accent-mid); box-shadow:0 0 0 3px rgba(31,78,121,.08);}
+  .field .rich-input:empty::before{content:attr(data-placeholder); color:var(--ink-faint); pointer-events:none;}
   .field input:focus, .field textarea:focus, .field select:focus{
     outline:none; border-color:var(--accent-mid); box-shadow:0 0 0 3px rgba(31,78,121,.08);
   }
   .field .microhint{font-size:.74rem; color:var(--ink-faint); margin-top:3px;}
   .row2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
   .row3{display:grid; grid-template-columns:2fr 1fr auto; gap:8px; align-items:end;}
+  /* Without this, a grid item's intrinsic content (e.g. a select box's widest
+     option) can force its track wider than its fr share and blow out the
+     row on narrow screens. */
+  .row2 > *, .row3 > *{min-width:0;}
 
   .honesty-note{
     background:var(--accent-light); border:1px solid var(--accent-mid); border-radius:8px;
-    padding:10px 14px; font-size:.8rem; color:var(--accent); margin-bottom:18px;
+    padding:8px 34px 8px 14px; font-size:.8rem; color:var(--accent); margin-bottom:18px; position:relative;
   }
   .honesty-note strong{font-weight:700;}
+  .honesty-note .hn-close{
+    position:absolute; top:7px; right:9px; border:none; background:none;
+    color:inherit; cursor:pointer; font-size:.85rem; padding:0;
+  }
+
+  .start-note{
+    background:var(--accent-light); border:1px solid var(--accent-mid); border-radius:8px;
+    padding:10px 14px; font-size:.8rem; color:var(--accent); margin-bottom:14px;
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  }
+  .start-note strong{font-weight:700;}
+  .start-note .sn-import{
+    background:var(--accent); border:1px solid var(--accent); color:#fff; font-weight:700;
+    border-radius:7px; padding:6px 14px; cursor:pointer; font-size:.78rem; white-space:nowrap;
+  }
+  .start-note .sn-import:hover{background:#163a5a;}
 
   .warn-banner{
     display:none; background:var(--warn-bg); border:1px solid #e2c06a; border-radius:8px;
@@ -78,6 +134,12 @@
     position:absolute; top:8px; right:10px; border:none; background:none; color:var(--danger);
     cursor:pointer; font-size:.85rem; font-weight:600;
   }
+  /* Invisible hit-area padding — grows the tap target to ~44px without changing the visible label.
+     Scoped to a direct child: these two sit alone in a card corner with room to spare. The
+     qualifications row's icon-only remove button (.rm-grid below) is packed between grid cells
+     instead, where the same trick would steal clicks from the input beside it. */
+  .rep-item > .rm::before{content:""; position:absolute; inset:-14px;}
+  .rm-grid{position:relative; padding:11px 14px !important;}
   .btn{
     display:inline-block; border:1px solid var(--accent); background:var(--accent); color:#fff;
     border-radius:8px; padding:9px 18px; font-size:.86rem; font-weight:600; cursor:pointer;
@@ -88,10 +150,97 @@
   .btn.ghost{background:transparent; color:var(--accent);}
   .btn.small{padding:6px 13px; font-size:.79rem;}
   .btn.green{background:var(--ok); border-color:var(--ok);}
+  .btn.big{padding:12px 22px; font-size:.95rem; border-radius:10px;}
+
+  /* ---------- ⓘ info popovers (replace long inline hint paragraphs) ---------- */
+  .info-wrap{position:relative; display:inline-block; vertical-align:middle;}
+  .info-btn{
+    position:relative; display:inline-flex; align-items:center; justify-content:center;
+    width:18px; height:18px; border-radius:50%; border:1px solid var(--accent-mid);
+    background:#fff; color:var(--accent); font-size:.7rem; font-weight:800;
+    cursor:pointer; margin-left:6px; padding:0; line-height:1; font-family:Georgia,serif; font-style:italic;
+  }
+  /* Invisible hit-area padding — grows the tap target to ~44px without changing the visible circle. */
+  .info-btn::before{content:""; position:absolute; inset:-13px;}
+  .info-btn:hover{background:var(--accent-light);}
+  .info-pop{
+    /* Fixed + centred mini pop-up: scrollable panes can't clip it. */
+    display:none; position:fixed; z-index:200; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:min(430px, 88vw); background:#fff; border:1px solid var(--line); border-radius:11px;
+    padding:14px 17px; box-shadow:0 18px 50px rgba(15,30,50,.28);
+    font-size:.81rem; font-weight:400; color:var(--ink-soft); line-height:1.55; text-align:left; white-space:normal;
+  }
+  .info-pop.show{display:block;}
+  .info-pop .ip-close{float:right; border:none; background:none; color:var(--ink-faint); cursor:pointer; font-size:.8rem; padding:0 0 0 8px;}
+
+  /* ---------- Template picker grid ---------- */
+  .tpl-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(92px,1fr)); gap:10px; margin:8px 0 12px; align-content:start;}
+  .tpl-card{
+    display:block; width:100%; font-family:inherit; appearance:none;
+    border:2px solid var(--line); border-radius:9px; background:#fff; cursor:pointer;
+    padding:5px 5px 3px; text-align:center; transition:all .12s; user-select:none;
+  }
+  .tpl-card:hover{border-color:var(--accent-mid);}
+  .tpl-card.sel{border-color:var(--accent); box-shadow:0 2px 8px rgba(31,78,121,.22);}
+  .tpl-thumb{
+    height:72px; border:1px solid #e3e8ef; border-radius:5px; overflow:hidden;
+    display:flex; flex-direction:column; background:#fff;
+  }
+  .tpl-thumb .tt-side{display:flex; flex:1;}
+  .tpl-thumb .tt-bar{height:5px; border-radius:2px; margin:2px 6px 1px;}
+  .tpl-thumb .tt-line{height:3px; border-radius:2px; margin:2px 6px; background:#d4dae2;}
+  .tpl-name{font-size:.68rem; font-weight:700; color:var(--ink-soft); margin-top:3px; line-height:1.2;}
+  .tpl-card.sel .tpl-name{color:var(--accent);}
+
+  /* ---------- Preview pane menu (CV / review / interview) ---------- */
+  .pane-menu{max-width:760px; margin:0 auto 14px; display:flex; gap:8px; flex-wrap:wrap;}
+  .pm-btn{
+    flex:1; border:1.5px solid var(--line); background:var(--card); color:var(--ink-soft);
+    padding:9px 10px; font-size:.85rem; font-weight:700; cursor:pointer; font-family:inherit;
+    border-radius:10px; transition:all .15s;
+  }
+  .pm-btn.active{background:var(--accent); border-color:var(--accent); color:#fff;}
+  .pm-btn.pm-tpl{flex:0 0 auto; background:#fff; color:var(--accent); border-color:var(--accent-mid);}
+
+  /* ---------- template picker: slide-in drawer over the form pane ----------
+     No backdrop — the live CV preview stays visible (and updating) on the
+     right while templates are tried. Width tracks the form pane; narrower
+     when the form is collapsed so even more of the preview shows. */
+  .tpl-modal{position:fixed; inset:0; z-index:150; pointer-events:none;}
+  .tpl-drawer{
+    position:fixed; top:0; left:0; bottom:0; pointer-events:auto;
+    width:min(640px, 46vw); background:#fff; padding:18px 20px; overflow-y:auto;
+    box-shadow:8px 0 40px rgba(10,25,45,.28);
+    transform:translateX(-103%); transition:transform .28s ease;
+  }
+  .tpl-modal.show .tpl-drawer{transform:translateX(0);}
+  body.form-collapsed .tpl-drawer{width:min(430px, 42vw);}
+  /* Form hidden + drawer open: push the preview right so the CV stays fully
+     visible next to the drawer instead of being covered by it. */
+  .pane-preview{transition:margin-left .28s ease;}
+  body.form-collapsed.tpl-open .pane-preview{margin-left:min(430px, 42vw);}
+  .tpl-modal-head{display:flex; align-items:center; gap:6px; font-weight:700; color:var(--accent); margin-bottom:10px;}
+  .tpl-modal-head .ip-close{margin-left:auto; font-size:1rem;}
+  #cv{transition:opacity .18s ease;}
+
+  /* ---------- version toggle + edit, one aligned row under the preview ---------- */
+  .preview-controls{max-width:760px; margin:12px auto; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;}
+  .preview-controls .view-toggle, .preview-controls .edit-bar{margin:0; max-width:none;}
+
+  /* ---------- Collapsible result panels ---------- */
+  .pt-bar{
+    display:flex; justify-content:space-between; align-items:center; cursor:pointer;
+    font-weight:700; color:var(--accent); margin:-2px 0 6px; user-select:none;
+  }
+  .pt-bar .pt-hint{font-size:.72rem; color:var(--ink-faint); font-weight:600;}
+  .suggest-panel.collapsed > *:not(.pt-bar){display:none;}
+  .suggest-panel.collapsed .pt-open{display:inline;}
+  .suggest-panel .pt-open{display:none;}
+  .suggest-panel.collapsed .pt-close{display:none;}
   .nav-btns{display:flex; justify-content:space-between; margin-top:18px;}
 
   /* ---------- Preview pane ---------- */
-  .export-bar{max-width:760px; margin:0 auto 16px; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 18px;}
+  .export-bar{max-width:760px; margin:16px auto; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 18px;}
   .export-title{font-size:.85rem; font-weight:700; color:var(--ink-soft); margin-bottom:9px;}
   .preview-toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
   .tpl-select{
@@ -122,6 +271,15 @@
   .vt-btn.active{background:var(--accent); border-color:var(--accent); color:#fff;}
   .vt-btn:disabled{opacity:.5; cursor:default;}
 
+  /* ---------- Autosave status ---------- */
+  .save-bar{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px; font-size:.75rem; color:var(--ink-faint);}
+  .save-bar .btn{flex-shrink:0;}
+
+  /* ---------- Manual preview editing ---------- */
+  .edit-bar{max-width:760px; margin:0 auto 12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+  .edit-note{font-size:.75rem; color:var(--ink-faint);}
+  .a4.editing{outline:2px dashed var(--accent); outline-offset:3px; cursor:text;}
+
   .a4{
     background:#fff; width:100%; max-width:760px; margin:0 auto;
     box-shadow:0 2px 14px rgba(20,40,70,.13); border-radius:4px;
@@ -130,7 +288,13 @@
   }
   .a4 .cv-name{font-size:26px; font-weight:700; letter-spacing:.4px; color:#16324f;}
   .a4 .cv-contact{font-size:12.5px; color:#4a5568; margin-top:3px; margin-bottom:14px;}
-  .a4 .cv-contact span:not(:last-child)::after{content:"  ·  "; color:#a8b2c1;}
+  /* One row per contact field (name/DOB/address/email/…). */
+  .a4 .cv-contact-row{display:block; line-height:1.5;}
+  /* Separator is REAL text (.csep), not ::after decoration — ATS parsers and
+     the health check read plain text, where pseudo-elements don't exist.
+     (Only used by the AI-generated version's single-line contact rendering —
+     the form-built header above uses .cv-contact-row instead.) */
+  .a4 .cv-contact .csep{color:#a8b2c1;}
   .a4 h3.cv-sec{
     font-size:13px; text-transform:uppercase; letter-spacing:1.6px; color:#16324f;
     border-bottom:1.5px solid #16324f; padding-bottom:3px; margin:18px 0 8px;
@@ -158,7 +322,7 @@
   .a4.tpl-minimal{font-family:Arial, Helvetica, sans-serif; color:#000;}
   .a4.tpl-minimal .cv-name{color:#000; font-size:24px; letter-spacing:0;}
   .a4.tpl-minimal .cv-contact{color:#000;}
-  .a4.tpl-minimal .cv-contact span:not(:last-child)::after{color:#000;}
+  .a4.tpl-minimal .cv-contact .csep{color:#000;}
   .a4.tpl-minimal h3.cv-sec{text-transform:none; letter-spacing:0; font-size:15px; color:#000; border-bottom:none; padding-bottom:0; font-family:inherit;}
   .a4.tpl-minimal .cv-entry-head .dates{color:#000; font-style:normal;}
 
@@ -166,9 +330,9 @@
   .a4.tpl-sidebar .cv-header{background:#22384c; padding:30px 40px 20px; margin:0;}
   .a4.tpl-sidebar .cv-header .cv-name{color:#fff; letter-spacing:.5px;}
   .a4.tpl-sidebar .cv-header .cv-contact{color:#c9d4e0; margin-bottom:0;}
-  .a4.tpl-sidebar .cv-header .cv-contact span:not(:last-child)::after{color:#7f93a8;}
+  .a4.tpl-sidebar .cv-header .cv-contact .csep{color:#7f93a8;}
   .a4.tpl-sidebar .cv-cols{display:flex; align-items:stretch; min-height:780px;}
-  .a4.tpl-sidebar .cv-side{flex:0 0 215px; background:#2c4258; color:#e9eef4; padding:22px 20px;}
+  .a4.tpl-sidebar .cv-side{flex:0 0 215px; background:#22384c; color:#e9eef4; padding:22px 20px;}
   .a4.tpl-sidebar .cv-side h3.cv-sec{color:#fff; border-bottom-color:rgba(255,255,255,.35); font-family:inherit;}
   .a4.tpl-sidebar .cv-side .cv-inline-list{color:#e9eef4;}
   .a4.tpl-sidebar .cv-side ul{margin-left:16px;}
@@ -179,7 +343,7 @@
   .a4.tpl-banner .cv-header{background:#1d63b8; padding:34px 44px 24px; text-align:center; margin:0;}
   .a4.tpl-banner .cv-header .cv-name{color:#fff; font-size:30px; letter-spacing:.5px;}
   .a4.tpl-banner .cv-header .cv-contact{color:#d7e5f7; margin-bottom:0;}
-  .a4.tpl-banner .cv-header .cv-contact span:not(:last-child)::after{color:#8fb4e3;}
+  .a4.tpl-banner .cv-header .cv-contact .csep{color:#8fb4e3;}
   .a4.tpl-banner .cv-body{padding:24px 44px 40px;}
   .a4.tpl-banner h3.cv-sec{color:#1d63b8; border-bottom:2px solid #1d63b8; text-transform:none; letter-spacing:.3px; font-size:15px; font-family:inherit;}
 
@@ -188,6 +352,164 @@
   .a4.tpl-elegant .cv-contact{color:#5e5257; text-align:center;}
   .a4.tpl-elegant h3.cv-sec{color:#6b1f2a; border-bottom:1px solid #c9a9ae; letter-spacing:2.2px; font-family:inherit;}
   .a4.tpl-elegant .cv-entry-head .dates{color:#5e5257;}
+
+  .a4.tpl-executive{font-family:Cambria, Georgia, 'Times New Roman', serif; color:#26272a;}
+  .a4.tpl-executive .cv-name{color:#1f2937; text-transform:uppercase; letter-spacing:2.5px; font-size:26px;}
+  .a4.tpl-executive .cv-contact{color:#6b7280;}
+  .a4.tpl-executive h3.cv-sec{color:#374151; border-bottom:.5px solid #9ca3af; letter-spacing:1.8px; font-family:inherit;}
+  .a4.tpl-executive .cv-entry-head .dates{color:#6b7280;}
+
+  .a4.tpl-cobalt{padding:0; overflow:hidden; font-family:'Segoe UI', Calibri, Arial, sans-serif; color:#1f2933;}
+  .a4.tpl-cobalt .cv-header{background:#16408a; padding:32px 44px 22px; margin:0;}
+  .a4.tpl-cobalt .cv-header .cv-name{color:#fff; font-size:29px; letter-spacing:.4px;}
+  .a4.tpl-cobalt .cv-header .cv-contact{color:#c7d6f5; margin-bottom:0;}
+  .a4.tpl-cobalt .cv-header .cv-contact .csep{color:#7c9ade;}
+  .a4.tpl-cobalt .cv-body{padding:24px 44px 40px;}
+  .a4.tpl-cobalt h3.cv-sec{color:#16408a; border-bottom:1.5px solid #16408a; text-transform:none; letter-spacing:.3px; font-size:15px; font-family:inherit;}
+
+  .a4.tpl-slate{padding:0; overflow:hidden; font-family:'Segoe UI', Calibri, Arial, sans-serif; color:#27313b;}
+  .a4.tpl-slate .cv-header{background:#3b4a58; padding:30px 40px 20px; margin:0;}
+  .a4.tpl-slate .cv-header .cv-name{color:#fff; letter-spacing:.5px;}
+  .a4.tpl-slate .cv-header .cv-contact{color:#d3dce4; margin-bottom:0;}
+  .a4.tpl-slate .cv-header .cv-contact .csep{color:#93a3b1;}
+  .a4.tpl-slate .cv-cols{display:flex; align-items:stretch; min-height:780px;}
+  .a4.tpl-slate .cv-side{flex:0 0 215px; background:#eef1f4; color:#33404c; padding:22px 20px;}
+  .a4.tpl-slate .cv-side h3.cv-sec{color:#3b4a58; border-bottom-color:#aeb9c4; font-family:inherit;}
+  .a4.tpl-slate .cv-side ul{margin-left:16px;}
+  .a4.tpl-slate .cv-main{flex:1; padding:22px 30px;}
+  .a4.tpl-slate .cv-main h3.cv-sec{color:#3b4a58; border-bottom:1.5px solid #3b4a58; font-family:inherit;}
+
+  .a4.tpl-ivory{font-family:'Book Antiqua', 'Palatino Linotype', Georgia, serif; color:#32302b;}
+  .a4.tpl-ivory .cv-name{color:#3e3a33; text-align:center;}
+  .a4.tpl-ivory .cv-contact{color:#7a7264; text-align:center;}
+  .a4.tpl-ivory h3.cv-sec{color:#8a6d3b; border-bottom:1px solid #c9b98f; letter-spacing:2.2px; font-family:inherit;}
+  .a4.tpl-ivory .cv-entry-head .dates{color:#7a7264;}
+
+  .a4.tpl-contemporary{font-family:'Trebuchet MS', 'Segoe UI', Arial, sans-serif; color:#25313a; line-height:1.55;}
+  .a4.tpl-contemporary .cv-name{color:#0f766e; font-size:29px; letter-spacing:0;}
+  .a4.tpl-contemporary .cv-contact{color:#5c6b75;}
+  .a4.tpl-contemporary h3.cv-sec{text-transform:none; letter-spacing:.2px; font-size:15px; color:#0f766e; border-bottom:2px solid #0f766e; font-family:inherit;}
+  .a4.tpl-contemporary .cv-entry-head b{color:#10202b;}
+  .a4.tpl-contemporary .cv-entry-head .dates{font-style:normal;}
+
+  .a4.tpl-graphite{padding:0; overflow:hidden; font-family:'Segoe UI', Calibri, Arial, sans-serif; color:#26282c;}
+  .a4.tpl-graphite .cv-header{background:#2b2d31; padding:32px 44px 22px; margin:0;}
+  .a4.tpl-graphite .cv-header .cv-name{color:#fff; font-size:29px; letter-spacing:.4px;}
+  .a4.tpl-graphite .cv-header .cv-contact{color:#cbd2d9; margin-bottom:0;}
+  .a4.tpl-graphite .cv-header .cv-contact .csep{color:#8a9199;}
+  .a4.tpl-graphite .cv-body{padding:24px 44px 40px;}
+  .a4.tpl-graphite h3.cv-sec{color:#b45309; border-bottom:1.5px solid #b45309; text-transform:none; letter-spacing:.3px; font-size:15px; font-family:inherit;}
+
+  .a4.tpl-forest{font-family:Garamond, 'EB Garamond', Georgia, serif; color:#27302a;}
+  .a4.tpl-forest .cv-name{color:#1e5631;}
+  .a4.tpl-forest .cv-contact{color:#5f6e64;}
+  .a4.tpl-forest h3.cv-sec{color:#1e5631; border-bottom:1px solid #9cb8a6; letter-spacing:1.8px; font-family:inherit;}
+  .a4.tpl-forest .cv-entry-head .dates{color:#5f6e64;}
+
+  .a4.tpl-merlot{padding:0; overflow:hidden; font-family:'Segoe UI', Calibri, Arial, sans-serif; color:#2b2226;}
+  .a4.tpl-merlot .cv-header{background:#4a1620; padding:30px 40px 20px; margin:0;}
+  .a4.tpl-merlot .cv-header .cv-name{color:#fff; letter-spacing:.5px;}
+  .a4.tpl-merlot .cv-header .cv-contact{color:#e3c9ce; margin-bottom:0;}
+  .a4.tpl-merlot .cv-header .cv-contact .csep{color:#b98790;}
+  .a4.tpl-merlot .cv-cols{display:flex; align-items:stretch; min-height:780px;}
+  .a4.tpl-merlot .cv-side{flex:0 0 215px; background:#4a1620; color:#f2e4e7; padding:22px 20px;}
+  .a4.tpl-merlot .cv-side h3.cv-sec{color:#fff; border-bottom-color:rgba(255,255,255,.35); font-family:inherit;}
+  .a4.tpl-merlot .cv-side ul{margin-left:16px;}
+  .a4.tpl-merlot .cv-main{flex:1; padding:22px 30px;}
+  .a4.tpl-merlot .cv-main h3.cv-sec{color:#4a1620; border-bottom:1.5px solid #4a1620; font-family:inherit;}
+
+  .a4.tpl-pearl{padding:0; overflow:hidden; font-family:'Segoe UI', Calibri, Arial, sans-serif; color:#2a323c;}
+  .a4.tpl-pearl .cv-header{background:#eef1f5; padding:32px 44px 22px; text-align:center; margin:0; border-bottom:1px solid #d8dee6;}
+  .a4.tpl-pearl .cv-header .cv-name{color:#1f2a37; font-size:29px; letter-spacing:.4px;}
+  .a4.tpl-pearl .cv-header .cv-contact{color:#5b6b7c; margin-bottom:0;}
+  .a4.tpl-pearl .cv-header .cv-contact .csep{color:#9fb0c0;}
+  .a4.tpl-pearl .cv-body{padding:24px 44px 40px;}
+  .a4.tpl-pearl h3.cv-sec{color:#2c7a7b; border-bottom:1px solid #2c7a7b; letter-spacing:1.5px; font-family:inherit;}
+
+  .a4.tpl-onyx{font-family:Arial, Helvetica, sans-serif; color:#111;}
+  .a4.tpl-onyx .cv-name{color:#000; text-transform:uppercase; letter-spacing:1.5px; font-size:30px;}
+  .a4.tpl-onyx .cv-contact{color:#444;}
+  .a4.tpl-onyx h3.cv-sec{color:#000; border-bottom:3px solid #000; letter-spacing:1.2px; font-family:inherit;}
+  .a4.tpl-onyx .cv-entry-head .dates{color:#444; font-style:normal;}
+
+  .a4.tpl-sapphire{font-family:Constantia, Cambria, Georgia, serif; color:#24303c;}
+  .a4.tpl-sapphire .cv-name{color:#15467a; text-align:center;}
+  .a4.tpl-sapphire .cv-contact{color:#5a6b7c; text-align:center;}
+  .a4.tpl-sapphire h3.cv-sec{color:#15467a; border-bottom:1px solid #8fb3d9; letter-spacing:1.8px; font-family:inherit;}
+  .a4.tpl-sapphire .cv-entry-head .dates{color:#5a6b7c;}
+
+  .a4.tpl-regal{font-family:Cambria, Georgia, serif; color:#2b2733;}
+  .a4.tpl-regal .cv-name{color:#4c1d95;}
+  .a4.tpl-regal .cv-contact{color:#6b6478;}
+  .a4.tpl-regal h3.cv-sec{color:#4c1d95; border-bottom:1px solid #b7a5e0; letter-spacing:1.8px; font-family:inherit;}
+  .a4.tpl-regal .cv-entry-head .dates{color:#6b6478;}
+
+  .a4.tpl-copper{font-family:Candara, 'Segoe UI', Arial, sans-serif; color:#2e2a26;}
+  .a4.tpl-copper .cv-name{color:#8c4a2f;}
+  .a4.tpl-copper .cv-contact{color:#75655a;}
+  .a4.tpl-copper h3.cv-sec{color:#8c4a2f; border-bottom:1.5px solid #8c4a2f; text-transform:none; letter-spacing:.3px; font-size:15px; font-family:inherit;}
+  .a4.tpl-copper .cv-entry-head b{color:#3a322b;}
+  .a4.tpl-copper .cv-entry-head .dates{color:#75655a; font-style:normal;}
+
+  .a4.tpl-blush{font-family:'Palatino Linotype', 'Book Antiqua', Georgia, serif; color:#33272b;}
+  .a4.tpl-blush .cv-name{color:#9d5c63; text-align:center;}
+  .a4.tpl-blush .cv-contact{color:#7d6a6e; text-align:center;}
+  .a4.tpl-blush h3.cv-sec{color:#9d5c63; border-bottom:1px solid #d9b3b8; letter-spacing:2.2px; font-family:inherit;}
+  .a4.tpl-blush .cv-entry-head .dates{color:#7d6a6e;}
+
+  .a4.tpl-sand{font-family:Tahoma, Verdana, sans-serif; color:#3a3a33;}
+  .a4.tpl-sand .cv-name{color:#6b705c; font-size:26px;}
+  .a4.tpl-sand .cv-contact{color:#7c7f70;}
+  .a4.tpl-sand h3.cv-sec{color:#6b705c; border-bottom:1px solid #6b705c; letter-spacing:1.8px; font-family:inherit;}
+  .a4.tpl-sand .cv-entry-head .dates{color:#7c7f70; font-style:normal;}
+
+  .a4.tpl-steel{padding:0; overflow:hidden; font-family:'Segoe UI', Calibri, Arial, sans-serif; color:#2a313a;}
+  .a4.tpl-steel .cv-header{background:#4b5563; padding:32px 44px 22px; margin:0;}
+  .a4.tpl-steel .cv-header .cv-name{color:#fff; font-size:29px; letter-spacing:.4px;}
+  .a4.tpl-steel .cv-header .cv-contact{color:#d3d8de; margin-bottom:0;}
+  .a4.tpl-steel .cv-header .cv-contact .csep{color:#9aa3ae;}
+  .a4.tpl-steel .cv-body{padding:24px 44px 40px;}
+  .a4.tpl-steel h3.cv-sec{color:#4b5563; border-bottom:1px solid #9aa3ae; letter-spacing:1.5px; font-family:inherit;}
+
+  .a4.tpl-midnight{padding:0; overflow:hidden; font-family:'Segoe UI', Calibri, Arial, sans-serif; color:#232a36;}
+  .a4.tpl-midnight .cv-header{background:#14213d; padding:34px 44px 24px; text-align:center; margin:0;}
+  .a4.tpl-midnight .cv-header .cv-name{color:#fff; font-size:30px; letter-spacing:.5px;}
+  .a4.tpl-midnight .cv-header .cv-contact{color:#c9d2e3; margin-bottom:0;}
+  .a4.tpl-midnight .cv-header .cv-contact .csep{color:#8a94ad;}
+  .a4.tpl-midnight .cv-body{padding:24px 44px 40px;}
+  .a4.tpl-midnight h3.cv-sec{color:#9a7b1c; border-bottom:1.5px solid #c9a227; text-transform:none; letter-spacing:.3px; font-size:15px; font-family:inherit;}
+
+  .a4.tpl-aqua{padding:0; overflow:hidden; font-family:'Segoe UI', Calibri, Arial, sans-serif; color:#24373c;}
+  .a4.tpl-aqua .cv-header{background:#dff0ee; padding:32px 44px 22px; text-align:center; margin:0; border-bottom:1px solid #bcd9d5;}
+  .a4.tpl-aqua .cv-header .cv-name{color:#0f5e59; font-size:29px; letter-spacing:.4px;}
+  .a4.tpl-aqua .cv-header .cv-contact{color:#4e6b6e; margin-bottom:0;}
+  .a4.tpl-aqua .cv-header .cv-contact .csep{color:#9fbcb8;}
+  .a4.tpl-aqua .cv-body{padding:24px 44px 40px;}
+  .a4.tpl-aqua h3.cv-sec{color:#0f5e59; border-bottom:1px solid #0f5e59; letter-spacing:1.5px; font-family:inherit;}
+
+  .a4.tpl-emerald{padding:0; overflow:hidden; font-family:'Segoe UI', Calibri, Arial, sans-serif; color:#253b33;}
+  .a4.tpl-emerald .cv-header{background:#1b4d3e; padding:30px 40px 20px; margin:0;}
+  .a4.tpl-emerald .cv-header .cv-name{color:#fff; letter-spacing:.5px;}
+  .a4.tpl-emerald .cv-header .cv-contact{color:#cde5dc; margin-bottom:0;}
+  .a4.tpl-emerald .cv-header .cv-contact .csep{color:#8fb8a8;}
+  .a4.tpl-emerald .cv-cols{display:flex; align-items:stretch; min-height:780px;}
+  .a4.tpl-emerald .cv-side{flex:0 0 215px; background:#1b4d3e; color:#e3f0ea; padding:22px 20px;}
+  .a4.tpl-emerald .cv-side h3.cv-sec{color:#fff; border-bottom-color:rgba(255,255,255,.35); font-family:inherit;}
+  .a4.tpl-emerald .cv-side ul{margin-left:16px;}
+  .a4.tpl-emerald .cv-main{flex:1; padding:22px 30px;}
+  .a4.tpl-emerald .cv-main h3.cv-sec{color:#1b4d3e; border-bottom:1.5px solid #1b4d3e; font-family:inherit;}
+
+  .a4.tpl-carbon{padding:0; overflow:hidden; font-family:'Segoe UI', Calibri, Arial, sans-serif; color:#26282b;}
+  .a4.tpl-carbon .cv-header{background:#26282b; padding:30px 40px 20px; margin:0;}
+  .a4.tpl-carbon .cv-header .cv-name{color:#fff; letter-spacing:.5px;}
+  .a4.tpl-carbon .cv-header .cv-contact{color:#cfcfcf; margin-bottom:0;}
+  .a4.tpl-carbon .cv-header .cv-contact .csep{color:#77797d;}
+  .a4.tpl-carbon .cv-cols{display:flex; align-items:stretch; min-height:780px;}
+  .a4.tpl-carbon .cv-side{flex:0 0 215px; background:#26282b; color:#e8e8e8; padding:22px 20px;}
+  .a4.tpl-carbon .cv-side h3.cv-sec{color:#fff; border-bottom-color:rgba(255,255,255,.35); font-family:inherit;}
+  .a4.tpl-carbon .cv-side ul{margin-left:16px;}
+  .a4.tpl-carbon .cv-main{flex:1; padding:22px 30px;}
+  .a4.tpl-carbon .cv-main h3.cv-sec{color:#b45309; border-bottom:1.5px solid #b45309; font-family:inherit;}
 
   /* ---------- AI suggestions panel (step 3) ---------- */
   .suggest-panel{
@@ -226,6 +548,19 @@
     display:inline-block; background:var(--ok-bg); color:var(--ok); border:1px solid var(--ok);
     border-radius:12px; padding:1px 9px; font-size:.7rem; font-weight:700; margin:0 2px;
   }
+  /* ---- CV health check / role keyword gap / interview practice ---- */
+  .score-row{display:flex; align-items:center; gap:12px; margin:8px 0 4px;}
+  .score-badge{font-size:26px; font-weight:800; border-radius:10px; padding:6px 14px; color:#fff;}
+  .score-red{background:#c0392b;} .score-amber{background:#d68910;} .score-green{background:#1e8449;}
+  .sev{display:inline-block; font-size:11px; font-weight:700; border-radius:6px; padding:1px 7px; margin-right:6px; color:#fff; vertical-align:1px;}
+  .sev-high{background:#c0392b;} .sev-medium{background:#d68910;} .sev-low{background:#7f8c8d;}
+  .kw-chip{display:inline-block; border:1px solid #c9d4e0; background:#f4f7fa; border-radius:14px; padding:2px 10px; margin:2px 4px 2px 0; font-size:12px;}
+  .iv-chat{display:flex; flex-direction:column; gap:8px; margin:10px 0; max-height:420px; overflow-y:auto;}
+  .iv-q,.iv-a,.iv-fb{border-radius:10px; padding:8px 12px; font-size:13px; line-height:1.45; max-width:92%;}
+  .iv-q{background:#eef4fb; align-self:flex-start;}
+  .iv-a{background:#eafaf1; align-self:flex-end;}
+  .iv-fb{background:#fdf6e3; align-self:flex-start; font-size:12.5px;}
+  .iv-score{font-weight:800;}
   .upgrade-panel{border-color:var(--warn) !important; background:var(--warn-bg) !important;}
   .upgrade-panel h2{color:var(--warn) !important;}
   .upgrade-panel .field{margin-top:12px;}
@@ -240,16 +575,31 @@
   /* ---------- Print: only the CV ---------- */
   @media print{
     body{background:#fff;}
-    header.app-header, .pane-form, .export-bar, .gaps-panel, .stepper, .ai-wrap, .site-footer, .view-toggle{display:none !important;}
+    header.app-header, .intro-strip, .pane-form, .export-bar, .gaps-panel, .stepper, .ai-wrap, .site-footer, .view-toggle, .edit-bar, .pane-menu, .info-pop, .preview-controls, .tpl-modal, .form-toggle{display:none !important;}
+    .a4.editing{outline:none;}
     .layout{display:block; min-height:0;}
     .pane-preview{padding:0; background:#fff; border:none; overflow:visible;}
     .a4{box-shadow:none; border-radius:0; max-width:100%; padding:10mm 14mm; min-height:0;}
+    .a4, .a4 *{-webkit-print-color-adjust:exact; print-color-adjust:exact; color-adjust:exact;}
     @page{size:A4; margin:12mm;}
   }
   @media (max-width:980px){
     .layout{flex-direction:column;}
     .pane-form{max-width:100%; flex:1;}
-    .pane-preview{border-left:none; border-top:1px solid var(--line);}
+    .pane-preview{border-left:none; border-top:1px solid var(--line); overflow-x:auto;}
+    .a4{padding:20px 16px;}
+    /* Sidebar/banner templates carry a fixed-width side column (215px) that must
+       stay readable rather than being squashed — the card scrolls horizontally
+       inside this pane instead, so the page itself never gains a scrollbar. */
+    .a4.tpl-sidebar, .a4.tpl-slate, .a4.tpl-merlot, .a4.tpl-emerald, .a4.tpl-carbon{min-width:520px;}
+    .a4 *{overflow-wrap:anywhere;}
+    /* The drawer's desktop width tracks the (now stacked-away) form pane's
+       46% — on a narrow screen that's an unusably thin strip, so widen it. */
+    .tpl-drawer, body.form-collapsed .tpl-drawer{width:min(420px, 92vw);}
+    body.form-collapsed.tpl-open .pane-preview{margin-left:0;}
+  }
+  @media (max-width:560px){
+    .start-note .sn-import{width:100%; text-align:center;}
   }
 </style>
 </head>
@@ -257,18 +607,35 @@
 
 <header class="app-header">
   <h1>School-Leaver CV Builder <span style="font-weight:300">· UK Format</span></h1>
-  <p>Answer the questions on the left — the CV builds itself on the right from <em>only</em> what you enter. Blank answers are left out, never invented. Export as PDF when done, or copy a ready-made Claude prompt for a polished rewrite.</p>
 </header>
+<div class="intro-strip">Answer the questions on the left — the CV builds itself on the right from <em>only</em> what you enter. Blank answers are left out, never invented. Export as PDF or Word when done.</div>
+
+<button class="form-toggle" id="formToggle" onclick="toggleFormPane()" title="Hide the form — preview the whole CV">«</button>
 
 <div class="layout">
 
   <!-- ============ FORM PANE ============ -->
   <div class="pane-form">
 
+    <div class="save-bar">
+      <span id="saveStatus" aria-live="polite">💾 Autosaves to this browser as you type — close the tab and come back any time</span>
+      <button class="btn small ghost" onclick="clearSaved()">🗑 Clear &amp; start over</button>
+    </div>
+
+    <div class="start-note" id="startNote">
+      <span style="flex:1; min-width:220px"><strong>Don't have a CV to import?</strong> No problem — build one from scratch: fill in the form below, step by step, and watch your CV take shape in the preview.</span>
+      <button type="button" class="sn-import" onclick="setPane('import')" title="Already have a CV? Import it and skip the typing">⚡ Import your CV</button>
+    </div>
+
     <div class="stepper" id="stepper"></div>
 
-    <div class="honesty-note">
-      <strong>Honesty rule:</strong> only enter things that actually happened. Anything you leave blank is simply omitted — a shorter truthful CV beats a padded one, and interviewers always probe the padding.
+    <div class="honesty-note" id="honestyNote">
+      <strong>Honesty rule:</strong> only enter things that actually happened — blanks are simply left out.
+      <span class="info-wrap"><button type="button" class="info-btn" onclick="toggleInfo('ipHonesty',event)">i</button>
+        <span class="info-pop" id="ipHonesty"><button class="ip-close" onclick="toggleInfo('ipHonesty',event)">✕</button>
+        Anything you leave blank is simply omitted, never invented — a shorter truthful CV beats a padded one, and interviewers always probe the padding. Every AI feature in this app follows the same rule: it can reword your facts, but it can never add things you didn't do.</span>
+      </span>
+      <button class="hn-close" onclick="dismissHonesty()" title="Got it — hide this">✕</button>
     </div>
 
     <div class="warn-banner" id="banWarn"></div>
@@ -279,37 +646,62 @@
         <h2>1 · The basics</h2>
         <p class="hint">Contact details and what this CV is for.</p>
         <div class="field">
-          <label>Already have a CV? <span class="opt">(PDF, Word or text — AI fills the form from it)</span></label>
-          <div class="fill-row">
-            <input type="file" id="f_cvfile" accept=".pdf,.docx,.txt" class="tpl-select" style="flex:1; min-width:200px;">
-            <button class="btn small" id="btnImport" onclick="importCV()">⬆ Import &amp; autofill</button>
-          </div>
-          <p class="microhint">Your file is read in memory to pull out the facts, then discarded — never stored. Only details actually in the CV are filled in.</p>
-          <p class="ai-msg" id="importMsg"></p>
-        </div>
-        <div class="row2">
-          <div class="field"><label>Full name</label><input type="text" id="f_name" placeholder="e.g. Alex Taylor"></div>
-          <div class="field"><label>Town / city</label><input type="text" id="f_city" placeholder="Manchester"></div>
-        </div>
-        <div class="row2">
-          <div class="field"><label>Email</label><input type="email" id="f_email" placeholder="e.g. alex.taylor@email.com"></div>
-          <div class="field"><label>Phone</label><input type="text" id="f_phone" placeholder="07xxx xxxxxx"></div>
-        </div>
-        <div class="field"><label>LinkedIn / GitHub / portfolio URL <span class="opt">(optional)</span></label><input type="text" id="f_links" placeholder="linkedin.com/in/… or github.com/…"></div>
-        <div class="field">
-          <label>What kind of role are you applying for?</label>
-          <select id="f_target">
-            <option value="general">General early-career role</option>
-            <option value="apprenticeship">Apprenticeship (incl. degree apprenticeships)</option>
-            <option value="university">University interview / admissions</option>
-            <option value="analytical">Analytical / data role</option>
-            <option value="office">Office / admin role</option>
-            <option value="retail">Retail / customer service</option>
-            <option value="hospitality">Hospitality / catering</option>
-            <option value="trades">Skilled trades / engineering</option>
-            <option value="creative">Creative / media role</option>
+          <label for="f_stage">Where are you in education?</label>
+          <select id="f_stage">
+            <option value="gcse">Finishing GCSEs / Year 11</option>
+            <option value="alevel" selected>A-levels or college (Year 12–13)</option>
+            <option value="scottish">Scottish school (Nat 5s / Highers)</option>
+            <option value="other">Other / not in school</option>
           </select>
-          <p class="microhint">This changes the wording of your profile summary.</p>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="f_name">Full name</label><input type="text" id="f_name" autocomplete="off" placeholder="e.g. Alex Taylor"></div>
+          <div class="field"><label for="f_dob">Date of birth <span class="opt">(optional)</span></label><input type="date" id="f_dob" autocomplete="off"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="f_email">Email</label><input type="email" id="f_email" autocomplete="off" placeholder="e.g. alex.taylor@email.com"></div>
+          <div class="field"><label for="f_phone">Phone</label><input type="text" id="f_phone" autocomplete="off" placeholder="07xxx xxxxxx"></div>
+        </div>
+        <div class="field"><label for="f_links">LinkedIn / GitHub / portfolio URL <span class="opt">(optional)</span></label><input type="text" id="f_links" autocomplete="off" placeholder="linkedin.com/in/… or github.com/…"></div>
+        <div class="field">
+          <label for="f_address">Address <span class="opt">(optional)</span>
+            <span class="info-wrap"><button type="button" class="info-btn" onclick="toggleInfo('ipAddr',event)">i</button>
+              <span class="info-pop" id="ipAddr"><button class="ip-close" onclick="toggleInfo('ipAddr',event)">✕</button>
+              Shown on the CV as "Address: …" if filled in — leave it blank if you'd rather not include it.</span>
+            </span>
+          </label>
+          <input type="text" id="f_address" autocomplete="off" placeholder="e.g. 12 High Street, Swansea SA1 1AA">
+        </div>
+        <div class="field">
+          <label for="f_profile">Profile summary <span class="opt">(auto-written from your role and qualifications — edit it freely)</span></label>
+          <div class="mini-fmt">
+            <button type="button" title="Bold (Ctrl+B)" onmousedown="event.preventDefault()" onclick="profFmt('bold')"><b>B</b></button>
+            <button type="button" title="Italic (Ctrl+I)" onmousedown="event.preventDefault()" onclick="profFmt('italic')"><i>I</i></button>
+            <button type="button" title="Underline (Ctrl+U)" onmousedown="event.preventDefault()" onclick="profFmt('underline')"><u>U</u></button>
+            <span class="opt">Enter = new line — bold/italic/underline carry into the CV, PDF and Word</span>
+          </div>
+          <div id="f_profile" class="rich-input" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Profile summary" data-placeholder="Fills in automatically once you add qualifications — or write your own here"></div>
+          <p class="microhint">This default updates as you change role or subjects. The moment you reword it, your version is kept and never overwritten — it goes on the CV word for word.</p>
+        </div>
+        <div class="field">
+          <label for="f_target">What kind of role are you applying for?</label>
+          <input type="text" id="f_target" list="targetRoleList" autocomplete="off"
+                 placeholder="Pick from the list or type your own — e.g. Trainee accountant">
+          <datalist id="targetRoleList">
+            <option value="General early-career role"></option>
+            <option value="Apprenticeship (incl. degree apprenticeships)"></option>
+            <option value="University interview / admissions"></option>
+            <option value="Analytical / data role"></option>
+            <option value="Accountancy / finance (trainee accountant)"></option>
+            <option value="Actuarial (trainee actuary)"></option>
+            <option value="Banking / quantitative finance"></option>
+            <option value="Office / admin role"></option>
+            <option value="Retail / customer service"></option>
+            <option value="Hospitality / catering"></option>
+            <option value="Skilled trades / engineering"></option>
+            <option value="Creative / media role"></option>
+          </datalist>
+          <p class="microhint">Pick a suggestion or type any role — this rewords the auto-written profile summary above (unless you've customised it) and the evidence prompts in step 3. Clear the box to see the full list again.</p>
         </div>
       </div>
     </div>
@@ -318,16 +710,16 @@
     <div class="wstep" data-step="1" style="display:none">
       <div class="card">
         <h2>2 · Education</h2>
-        <p class="hint">School, A Levels and GCSE headline only — no need to list every GCSE.</p>
-        <div class="field"><label>School / college name</label><input type="text" id="f_school" placeholder="e.g. Altrincham Grammar School"></div>
-        <div class="field"><label>Dates attended</label><input type="text" id="f_schooldates" placeholder="2019 – 2026"></div>
+        <p class="hint" id="s2_hint">School, qualifications and GCSE headline only — no need to list every GCSE.</p>
+        <div class="field"><label for="f_school">School / college name</label><input type="text" id="f_school" placeholder="e.g. Altrincham Grammar School"></div>
+        <div class="field"><label for="f_schooldates">Dates attended</label><input type="text" id="f_schooldates" placeholder="2019 – 2026"></div>
         <div class="field">
-          <label>A Level subjects &amp; grades</label>
-          <div class="rep-list" id="list_alevels"></div>
-          <button class="btn ghost small" onclick="addALevel()">+ Add subject</button>
-          <p class="microhint">Use predicted grades if results aren't out — mark them "(predicted)".</p>
+          <label id="qualsLabel">Qualifications</label>
+          <div class="rep-list" id="list_qualifications" role="group" aria-labelledby="qualsLabel"></div>
+          <button class="btn ghost small" onclick="addQualification()">+ Add qualification</button>
+          <p class="microhint">Use predicted grades if results aren't out — tick "Predicted grade".</p>
         </div>
-        <div class="field"><label>GCSE summary <span class="opt">(one line)</span></label><input type="text" id="f_gcse" placeholder="e.g. 10 GCSEs grades 9–7, including 9 in Maths and 9 in Physics"></div>
+        <div class="field" id="gcseSummaryField"><label for="f_gcse">GCSE summary <span class="opt">(one line)</span></label><input type="text" id="f_gcse" placeholder="e.g. 10 GCSEs grades 9–7, including 9 in Maths and 9 in Physics"></div>
       </div>
     </div>
 
@@ -341,9 +733,9 @@
           <div class="suggest-panel" id="suggestPanel"></div>
         </div>
         <div class="field">
-          <label>Describe something you did — AI writes it in for you</label>
+          <label for="f_filltext3">Describe something you did — AI writes it in for you</label>
           <div class="fill-row">
-            <select id="f_fillcat3" class="tpl-select">
+            <select id="f_fillcat3" class="tpl-select" aria-label="Add step 3 entry as">
               <option value="project">Add as: Project</option>
               <option value="achievement">Add as: Achievement</option>
               <option value="skill">Add as: Skill</option>
@@ -352,20 +744,20 @@
             <button class="btn small" id="btnPolish3" onclick="polishAI(3)">✨ Write &amp; fill</button>
           </div>
           <p class="microhint">Only true things — AI tidies the wording and never invents details; anything it can't know appears as [brackets] for you to fill.</p>
-          <p class="ai-msg" id="fillmsg3"></p>
+          <p class="ai-msg" id="fillmsg3" aria-live="polite"></p>
         </div>
         <div class="field">
           <label id="s3_projLabel">Projects (EPQ, coding, data analysis, AI experiments…)</label>
-          <div class="rep-list" id="list_projects"></div>
+          <div class="rep-list" id="list_projects" role="group" aria-labelledby="s3_projLabel"></div>
           <button class="btn ghost small" onclick="addProject()">+ Add project</button>
         </div>
         <div class="field">
-          <label><span id="s3_quantLabel">Maths / quant evidence</span> <span class="opt">(optional)</span></label>
+          <label for="f_quant"><span id="s3_quantLabel">Maths / quant evidence</span> <span class="opt">(optional)</span></label>
           <textarea id="f_quant" placeholder="e.g. UKMT Senior Maths Challenge — Gold, 2025; STEP preparation; Kaggle competition entry"></textarea>
           <p class="microhint" id="s3_quantHint">Olympiads, UKMT, STEP/MAT prep, Kaggle, coding competitions.</p>
         </div>
         <div class="field">
-          <label><span id="s3_skillsLabel">Technical skills &amp; tools</span> <span class="opt">(only ones you've used)</span></label>
+          <label for="f_skills"><span id="s3_skillsLabel">Technical skills &amp; tools</span> <span class="opt">(only ones you've used)</span></label>
           <input type="text" id="f_skills" placeholder="e.g. Python (pandas), Excel, Claude AI for study workflows, basic SQL">
         </div>
       </div>
@@ -377,9 +769,9 @@
         <h2>4 · Experience &amp; responsibility</h2>
         <p class="hint">Part-time jobs, volunteering, and formal roles. Include dates.</p>
         <div class="field">
-          <label>Describe something you did — AI writes it in for you</label>
+          <label for="f_filltext4">Describe something you did — AI writes it in for you</label>
           <div class="fill-row">
-            <select id="f_fillcat4" class="tpl-select">
+            <select id="f_fillcat4" class="tpl-select" aria-label="Add step 4 entry as">
               <option value="job">Add as: Work / volunteering</option>
               <option value="responsibility">Add as: Responsibility</option>
             </select>
@@ -387,15 +779,15 @@
             <button class="btn small" id="btnPolish4" onclick="polishAI(4)">✨ Write &amp; fill</button>
           </div>
           <p class="microhint">Only true things — AI tidies the wording; details it can't know appear as [brackets] for you to fill.</p>
-          <p class="ai-msg" id="fillmsg4"></p>
+          <p class="ai-msg" id="fillmsg4" aria-live="polite"></p>
         </div>
         <div class="field">
-          <label>Work experience / volunteering</label>
-          <div class="rep-list" id="list_jobs"></div>
+          <label id="s4_jobsLabel">Work experience / volunteering</label>
+          <div class="rep-list" id="list_jobs" role="group" aria-labelledby="s4_jobsLabel"></div>
           <button class="btn ghost small" onclick="addJob()">+ Add role</button>
         </div>
         <div class="field">
-          <label>Positions of responsibility <span class="opt">(prefect, mentor, team captain, club founder…)</span></label>
+          <label for="f_responsibility">Positions of responsibility <span class="opt">(prefect, mentor, team captain, club founder…)</span></label>
           <textarea id="f_responsibility" placeholder="e.g. Prefect 2024–26; netball team captain, organising warm-ups and fixtures for a squad of 12"></textarea>
         </div>
       </div>
@@ -407,9 +799,9 @@
         <h2>5 · Sport, interests &amp; extras</h2>
         <p class="hint">Be specific: club or group names, levels, years, concrete outcomes. Never just "enjoys sport and music".</p>
         <div class="field">
-          <label>Describe something you do — AI writes it in for you</label>
+          <label for="f_filltext5">Describe something you do — AI writes it in for you</label>
           <div class="fill-row">
-            <select id="f_fillcat5" class="tpl-select">
+            <select id="f_fillcat5" class="tpl-select" aria-label="Add step 5 entry as">
               <option value="sport">Add as: Sport / activity</option>
               <option value="award">Add as: Award / achievement</option>
               <option value="interest">Add as: Interest</option>
@@ -418,28 +810,28 @@
             <button class="btn small" id="btnPolish5" onclick="polishAI(5)">✨ Write &amp; fill</button>
           </div>
           <p class="microhint">Only true things — AI tidies the wording; details it can't know appear as [brackets] for you to fill.</p>
-          <p class="ai-msg" id="fillmsg5"></p>
+          <p class="ai-msg" id="fillmsg5" aria-live="polite"></p>
         </div>
         <div class="field">
-          <label>Sport / activity <span class="opt">(club or group, level, years, roles)</span></label>
+          <label for="f_football">Sport / activity <span class="opt">(club or group, level, years, roles)</span></label>
           <textarea id="f_football" placeholder="e.g. Netball 1st VII vice-captain, 2024–26; Sunday-league football; dance academy shows; climbing club 2023–present"></textarea>
         </div>
         <div class="field">
-          <label>Fitness — concrete items only <span class="opt">(optional)</span></label>
+          <label for="f_fitness">Fitness — concrete items only <span class="opt">(optional)</span></label>
           <textarea id="f_fitness" placeholder="e.g. Completed Manchester Half Marathon 2025 (1:42); followed structured strength programme 4×/week for 2 years, tracking progress in a spreadsheet"></textarea>
         </div>
         <div class="field">
-          <label>Awards &amp; other achievements <span class="opt">(DofE, music grades, languages…)</span></label>
+          <label for="f_awards">Awards &amp; other achievements <span class="opt">(DofE, music grades, languages…)</span></label>
           <textarea id="f_awards" placeholder="e.g. Duke of Edinburgh Silver Award, 2024; Grade 5 piano"></textarea>
         </div>
         <div class="field">
-          <label>Other interests <span class="opt">(one line, specific)</span></label>
+          <label for="f_interests">Other interests <span class="opt">(one line, specific)</span></label>
           <input type="text" id="f_interests" placeholder="e.g. Baking for school charity sales; chess club; grade 5 guitar; following AI research">
         </div>
       </div>
       <div class="card" style="border-color:var(--ok); background:var(--ok-bg);">
         <h2 style="color:var(--ok)">Done — export on the right</h2>
-        <p class="hint" style="color:var(--ink-soft); margin-bottom:0">Your CV preview is complete. Generate it as <b>PDF</b> or <b>Word</b> from the panel on the right, use <b>✨ Generate with AI</b> for a polished rewrite, or use <b>Copy Claude prompt</b> to run the rewrite in your own Claude — the prompt includes strict no-fabrication rules.</p>
+        <p class="hint" style="color:var(--ink-soft); margin-bottom:0">Your CV preview is complete. Generate it as <b>PDF</b> or <b>Word</b> from the panel on the right, or use <b>✨ Generate with AI</b> for a polished rewrite with strict no-fabrication rules.</p>
       </div>
     </div>
 
@@ -451,57 +843,177 @@
 
   <!-- ============ PREVIEW PANE ============ -->
   <div class="pane-preview">
-    <div class="export-bar">
-      <div class="export-title">Generate your CV as:</div>
-      <div class="preview-toolbar">
-        <button class="btn green" onclick="window.print()">📄 PDF</button>
-        <button class="btn green" onclick="exportWord()">📝 Word</button>
-        <select id="f_wordtpl" class="tpl-select" title="Choose the CV template — the preview updates so you can see it before downloading">
-          <option value="classic">Template: Classic</option>
-          <option value="modern">Template: Modern</option>
-          <option value="minimal">Template: Minimal (ATS-safe)</option>
-          <option value="elegant">Template: Elegant</option>
-          <option value="sidebar">Template: Sidebar</option>
-          <option value="banner">Template: Banner</option>
-        </select>
-        <button class="btn" id="btnAI" onclick="generateAI()">✨ Generate with AI</button>
-        <span class="badge-beta" id="betaBadge">Free during beta</span>
-        <button class="btn ghost" onclick="copyPrompt()">📋 Copy Claude prompt</button>
-      </div>
-      <p class="export-note">Apply with <b>PDF or Word</b> — that's what recruiters and apprenticeship portals expect. Pick a template to restyle the preview — PDF and Word downloads match what you see (Minimal is the safest for automated ATS screening). <b>Generate with AI</b> sends your facts to our server for a polished rewrite with strict no-invention rules; nothing is stored. The Claude prompt does the same in your own Claude.</p>
-      <span class="copied-flash" id="copiedFlash"></span>
+    <div class="pane-menu">
+      <button class="pm-btn active" id="pmCV" onclick="setPane('cv')" title="Your CV, built live from the form">📄 My CV</button>
+      <button class="pm-btn pm-tpl" onclick="openTplModal()" title="Pick a design — the preview restyles instantly">🎨 Style it</button>
+      <button class="pm-btn" id="pmImport" onclick="setPane('import')" title="Import an existing CV and skip the typing">⚡ Import</button>
+      <button class="pm-btn" id="pmHealth" onclick="setPane('health')" title="Score the CV you've built (or an imported file) the way an ATS reads it">🩺 Score it</button>
+      <button class="pm-btn" id="pmTailor" onclick="setPane('tailor')" title="Sharpen your CV for one specific job advert">🎯 Match a job</button>
+      <button class="pm-btn" id="pmReview" onclick="setPane('review')" title="Honest gaps in your CV and concrete actions to close them">🧭 Honest review</button>
+      <button class="pm-btn" id="pmInterview" onclick="setPane('interview')" title="Practise a realistic interview for your target role">🎤 Mock interview</button>
     </div>
 
-    <div class="view-toggle" id="viewToggle">
-      <button class="vt-btn active" id="vtForm" onclick="setView('form')">Form version</button>
-      <button class="vt-btn" id="vtAI" onclick="setView('ai')" disabled title="Generate with AI, then click 'Use this version'">AI version</button>
+    <div class="tpl-modal" id="tplModal">
+      <div class="tpl-drawer">
+        <div class="tpl-modal-head">🎨 Choose a template
+          <span class="info-wrap"><button type="button" class="info-btn" onclick="toggleInfo('ipTpl',event)">i</button>
+            <span class="info-pop" id="ipTpl"><button class="ip-close" onclick="toggleInfo('ipTpl',event)">✕</button>
+            The preview restyles instantly and PDF/Word downloads match it exactly. <b>Modern</b> is the safest well-styled pick for UK recruiters; <b>Minimal</b> is the most conservative for automated ATS screening on big job portals. These are our own <b>Word-compatible designs</b> in the style of classic résumé templates — the download is a real .docx that opens and edits in Word, but you won't find them in Word's own template gallery.</span>
+          </span>
+          <button class="ip-close" onclick="closeTplModal()">✕</button>
+        </div>
+        <div class="tpl-grid" id="tplGridModal"></div>
+        <p class="microhint" style="margin-top:8px">The preview on the right updates live — try a few, then ✕ to close (or press Esc).</p>
+      </div>
     </div>
 
     <div class="a4" id="cv"></div>
 
+    <div class="preview-controls" id="previewControls">
+      <div class="view-toggle" id="viewToggle">
+        <button class="vt-btn active" id="vtForm" onclick="setView('form')">Form version</button>
+        <button class="vt-btn" id="vtAI" onclick="setView('ai')" disabled title="Generate with AI, then click 'Use this version'">AI version</button>
+      </div>
+      <div class="edit-bar" id="editBar"></div>
+    </div>
+
+    <div class="export-bar" id="exportBar">
+      <select id="f_wordtpl" style="display:none">
+        <option value="modern" selected>Modern</option><option value="classic">Classic</option>
+        <option value="minimal">Minimal</option><option value="elegant">Elegant</option>
+        <option value="sidebar">Sidebar</option><option value="banner">Banner</option>
+        <option value="executive">Executive</option><option value="contemporary">Contemporary</option>
+        <option value="cobalt">Cobalt</option><option value="slate">Slate</option>
+        <option value="ivory">Ivory</option><option value="onyx">Onyx</option>
+        <option value="forest">Forest</option><option value="graphite">Graphite</option>
+        <option value="pearl">Pearl</option><option value="merlot">Merlot</option>
+        <option value="sapphire">Sapphire</option><option value="regal">Regal</option>
+        <option value="copper">Copper</option><option value="blush">Blush</option>
+        <option value="sand">Sand</option><option value="steel">Steel</option>
+        <option value="midnight">Midnight</option><option value="aqua">Aqua</option>
+        <option value="emerald">Emerald</option><option value="carbon">Carbon</option>
+      </select>
+      <div class="preview-toolbar">
+        <button class="btn green big" onclick="downloadPDF()">⬇ Save as PDF</button>
+        <button class="btn green big" onclick="exportWord()">⬇ Download Word</button>
+        <button class="btn" id="btnAI" onclick="generateAI()">✨ Generate with AI</button>
+        <span class="badge-beta" id="betaBadge">Free during beta</span>
+        <span class="info-wrap"><button type="button" class="info-btn" onclick="toggleInfo('ipExport',event)">i</button>
+          <span class="info-pop" id="ipExport"><button class="ip-close" onclick="toggleInfo('ipExport',event)">✕</button>
+          Apply with <b>PDF or Word</b> — that's what recruiters and apprenticeship portals expect. <b>Downloads are snapshots</b>: edits made to the file in Word don't come back to this page — edit here (✏️ Edit this version) and re-download, or re-import your edited Word file in step 1. <b>Generate with AI</b> (part of the £4.99/month AI upgrade) sends your facts to our server for a polished rewrite with strict no-invention rules; nothing is stored.</span>
+        </span>
+      </div>
+      <span class="copied-flash" id="copiedFlash" aria-live="polite"></span>
+      <div class="honesty-note" id="pdfNote" style="display:none; margin-top:8px" aria-live="polite">
+        In the print window, choose <strong>"Save as PDF"</strong> as the destination.
+        <button class="hn-close" onclick="dismissPdfNote()" title="Got it — hide this">✕</button>
+      </div>
+    </div>
+
+    <div class="gaps-panel" id="importPanel" style="display:none">
+      <div class="card">
+        <h2 style="color:var(--accent)">⚡ Import an existing CV <span class="opt" style="font-weight:400; font-size:.8rem">(PDF, Word or text — import it and skip the typing)</span>
+          <span class="info-wrap"><button type="button" class="info-btn" onclick="toggleInfo('ipImport',event)">i</button>
+            <span class="info-pop" id="ipImport"><button class="ip-close" onclick="toggleInfo('ipImport',event)">✕</button>
+            <b>Free:</b> your contact details are pulled from the file automatically — no AI involved. <b>With the AI upgrade (£4.99/month):</b> Claude reads the whole CV and fills every step of the form. Either way the file is read in memory and discarded — never stored by us, and nothing is ever invented.</span>
+          </span>
+        </h2>
+        <div class="fill-row" style="margin-top:8px">
+          <input type="file" id="f_cvfile" aria-label="Choose a CV file to import" accept=".pdf,.docx,.doc,.txt" class="tpl-select" style="flex:1; min-width:200px;">
+          <button class="btn small" id="btnImport" onclick="importCV()">⚡ Import &amp; autofill</button>
+        </div>
+        <p class="ai-msg" id="importMsg" aria-live="polite"></p>
+        <p class="microhint" style="margin-top:6px">The same file also feeds the 🩺 Health check tab.</p>
+      </div>
+    </div>
+
+    <div class="gaps-panel" id="tailorPane" style="display:none">
+      <div class="card">
+        <h2 style="color:var(--accent)">🎯 Match a specific job advert
+          <span class="info-wrap"><button type="button" class="info-btn" onclick="toggleInfo('ipTailor',event)">i</button>
+            <span class="info-pop" id="ipTailor"><button class="ip-close" onclick="toggleInfo('ipTailor',event)">✕</button>
+            AI rewrites your profile summary to speak to this advert and reorders your skills so the most relevant come first — using <b>only things you've entered</b>, never skills from the advert you don't have. Requirements you can't yet evidence are listed as honest gaps, never added to the CV. With an advert here, ✨ Generate with AI also tailors the whole CV to it.</span>
+          </span>
+        </h2>
+        <div class="fill-row" style="margin-top:8px">
+          <input type="text" id="f_joburl" aria-label="Job advert link" placeholder="Job advert link — e.g. https://www.gov.uk/apply-apprenticeship/…" style="flex:1; min-width:200px;" class="tpl-select">
+          <button class="btn small" id="btnFetchJob" onclick="fetchJobAd()">🔗 Fetch advert</button>
+        </div>
+        <div class="field" style="margin-top:8px">
+          <textarea id="f_jobdesc" rows="5" aria-label="Job description" placeholder="…or paste the job description here (the whole advert is fine)"></textarea>
+        </div>
+        <div class="fill-row">
+          <button class="btn small" id="btnTailor" onclick="tailorAI()">✨ Tailor profile &amp; skills to this job</button>
+        </div>
+        <div class="microhint" style="margin-top:6px">
+          <b>Automatically applied to your CV</b> (the moment tailoring completes):
+          <ul style="margin:3px 0 3px 18px">
+            <li><b>Profile summary</b> — rewritten to speak to this advert (using only facts you've entered). It replaces what's in the profile box, and counts as "customised", so it stays until you change it.</li>
+            <li><b>Skills order</b> — your existing skills reordered so the ones most relevant to this advert come first. Nothing added, nothing removed — just resequenced.</li>
+          </ul>
+          Everything else (requirements you match, honest gaps) is shown as guidance only and never added to your CV.
+        </div>
+        <p class="ai-msg" id="tailorMsg" aria-live="polite"></p>
+        <div class="suggest-panel" id="tailorPanel"></div>
+        <div id="kwgapField" style="display:none; margin-top:14px">
+          <b style="font-size:.85rem">What this role really asks for <span class="opt" style="font-weight:400">(from live UK job adverts)</span></b>
+          <span class="info-wrap"><button type="button" class="info-btn" onclick="toggleInfo('ipKwgap',event)">i</button>
+            <span class="info-pop" id="ipKwgap"><button class="ip-close" onclick="toggleInfo('ipKwgap',event)">✕</button>
+            Compares what you've entered against real, current UK adverts for your target role — the skills employers ask for most, which ones you can already evidence, and honest gaps with one way to genuinely close each. Nothing is ever added to your CV from this.</span>
+          </span>
+          <div class="fill-row" style="margin-top:6px">
+            <button class="btn small" id="btnKwGap" onclick="keywordGapAI()">📊 Check my match against real adverts</button>
+          </div>
+          <p class="ai-msg" id="kwgapMsg" aria-live="polite"></p>
+          <div class="suggest-panel" id="kwgapPanel"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gaps-panel" id="healthPanel" style="display:none">
+      <div class="card">
+        <h2 style="color:var(--accent)">🩺 Score it <span class="opt" style="font-weight:400; font-size:.8rem">(free — see how an ATS reads the CV you've built)</span>
+          <span class="info-wrap"><button type="button" class="info-btn" onclick="toggleInfo('ipDiag',event)">i</button>
+            <span class="info-pop" id="ipDiag"><button class="ip-close" onclick="toggleInfo('ipDiag',event)">✕</button>
+            Scores <b>the CV you've built in the form</b> — or, if a file is chosen in the ⚡ Import tab, that file instead — the way an applicant tracking system parses it. <b>Free:</b> an instant automatic check (no AI involved) — your score plus the single biggest problem, 3 checks a day. <b>AI upgrade (£4.99/month):</b> Claude reads the whole CV — every flag, each with a concrete fix.</span>
+          </span>
+        </h2>
+        <div class="fill-row" style="margin-top:8px">
+          <button class="btn small" id="btnDiagnose" onclick="diagnoseAI()">🩺 Score my CV</button>
+        </div>
+        <p class="ai-msg" id="diagnoseMsg" aria-live="polite"></p>
+        <div class="suggest-panel" id="diagnosePanel"></div>
+      </div>
+    </div>
+
     <div class="gaps-panel" id="gapsPanel"></div>
 
-    <div class="ai-wrap" id="aiWrap">
+    <!-- Not gated by setPane's per-pane show/hide: a 402 can happen from the Tailor,
+         Import or Keyword-gap panes too, and the subscribe card must still be reachable
+         there — see showUpgrade(). -->
+    <div class="ai-wrap" id="upgradeWrap">
       <div class="card upgrade-panel" id="upgradePanel" style="display:none">
         <h2>Subscribe to use AI generation</h2>
-        <p class="hint" style="margin-bottom:0">AI generation needs an active subscription. Subscribe to get a licence key by email, then paste it below — it's kept only in this tab and never saved.</p>
+        <p class="hint" style="margin-bottom:0">AI generation needs an active subscription — <b>£4.99/month, cancel any time</b>. Subscribe to get a licence key by email, then paste it below — it's kept only in this tab and never saved. Building, previewing and PDF/Word export stay free without one.</p>
         <div class="preview-toolbar" style="margin-top:12px">
           <a class="btn" id="subscribeLink" href="#" target="_blank" rel="noopener">Subscribe</a>
         </div>
         <div class="field">
-          <label>Already subscribed? Paste your licence key</label>
+          <label for="f_licensekey">Already subscribed? Paste your licence key</label>
           <div class="row3" style="grid-template-columns:1fr auto">
             <input type="text" id="f_licensekey" placeholder="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" autocomplete="off">
             <button class="btn small" onclick="useLicenseKey()">Use key</button>
           </div>
           <p class="microhint">The key stays in memory for this tab only — it is not written to localStorage or cookies.</p>
         </div>
-        <p class="ai-msg err" id="upgradeMsg"></p>
+        <p class="ai-msg err" id="upgradeMsg" aria-live="polite"></p>
       </div>
+    </div>
 
+    <div class="ai-wrap" id="aiWrap">
       <div class="card" id="aiPanel" style="display:none">
         <h2>✨ AI-generated CV</h2>
-        <p class="ai-msg" id="aiMsg"></p>
+        <p class="ai-msg" id="aiMsg" aria-live="polite"></p>
         <pre id="aiOutput" style="display:none"></pre>
         <div class="preview-toolbar" id="aiActions" style="display:none">
           <button class="btn small green" onclick="useAIVersion()">✅ Use this version</button>
@@ -512,53 +1024,299 @@
 
       <div class="card" id="actionsPanel" style="display:none">
       </div>
+
+      <div class="card" id="interviewPanel">
+        <h2>🎤 Mock interview
+          <span class="info-wrap"><button type="button" class="info-btn" onclick="toggleInfo('ipIv',event)">i</button>
+            <span class="info-pop" id="ipIv" style="font-weight:400"><button class="ip-close" onclick="toggleInfo('ipIv',event)">✕</button>
+            Claude plays the hiring manager for your target role: 6–8 realistic questions, every answer rated out of 10 with feedback, then a summary of what to work on before the real thing. Uses only what you've entered — part of the AI upgrade (£4.99/month).</span>
+          </span>
+        </h2>
+        <div class="preview-toolbar">
+          <button class="btn small" id="btnInterview" onclick="startInterview()">▶ Start practice interview</button>
+          <button class="btn small ghost" id="btnIvReset" onclick="resetInterview()" style="display:none">↺ Start again</button>
+        </div>
+        <div id="ivChat" class="iv-chat" style="display:none"></div>
+        <div class="fill-row" id="ivAnswerRow" style="display:none">
+          <textarea id="ivAnswer" rows="3" placeholder="Say your answer out loud first, then type it here" style="flex:1; min-width:200px"></textarea>
+          <button class="btn small" id="btnIvSend" onclick="sendInterviewAnswer()">Answer</button>
+        </div>
+        <p class="ai-msg" id="ivMsg" aria-live="polite"></p>
+      </div>
     </div>
   </div>
 </div>
 
 <footer class="site-footer">
-  CV Builder · <a href="/privacy">Privacy</a> · Your CV data is processed in memory to generate output — never stored, never used for training.
+  CV Builder · <a href="/privacy">Privacy</a> · <a href="mailto:[CONTACT_EMAIL]">Contact</a> · Your CV data is processed in memory to generate output — never stored on our servers, never used for training. Progress autosaves only to your own browser; "Clear &amp; start over" deletes it.
 </footer>
 
 <script>
 /* ================= state (in-memory only) ================= */
-const S = { alevels:[], projects:[], jobs:[] };
+const QUALIFICATION_LEVELS = ["GCSE","A-level","AS-level","BTEC","T-Level","National 5","Higher","Advanced Higher","Other"];
+// Highest-ranked leaving-school-level qualifications first, then
+// intermediate levels, GCSEs last but one, "Other" last of all — used to
+// group the Education preview/exports and to decide what the auto-profile
+// summary is built from (see profileLine()).
+const LEVEL_ORDER = ["A-level","Advanced Higher","BTEC","T-Level","Higher","AS-level","National 5","GCSE","Other"];
+// Final/leaving-school-level and pre-final (AS/Higher) qualifications —
+// presence of any of these takes precedence over GCSEs when building the
+// auto-profile summary (requirement: "A-levels/Highers if present,
+// otherwise GCSEs"). Matches LEVEL_ORDER's grouping of A-level/Advanced
+// Higher/BTEC/T-Level as co-equal final-level qualifications (none is
+// objectively "above" the others) — a student with both an A-level and a
+// BTEC gets both in the profile sentence, matching what the Education
+// block already shows, rather than the profile silently dropping the BTEC.
+const HIGHER_TIER_LEVELS = ["A-level","AS-level","Higher","Advanced Higher","BTEC","T-Level"];
+const S = { qualifications:[], projects:[], jobs:[] };
+// "grade (predicted)" — the one place that decides how a qualification's
+// grade + predicted flag render as text, so preview, print, .docx export
+// and the AI facts strings can never drift out of sync with each other.
+function gradeText(q){
+  if(q.grade && q.predicted) return q.grade + " (predicted)";
+  if(q.grade) return q.grade;
+  if(q.predicted) return "(predicted)";
+  return "";
+}
+// "Subject grade (predicted)" — plain-text row summary shared by
+// profileLine() and the AI facts builders.
+function qualRowText(q){
+  const g = gradeText(q);
+  return q.subject + (g ? " " + g : "");
+}
+function qualLevelLabel(lvl){ return lvl === "Other" ? "Other qualifications" : lvl + "s"; }
+// Every consumer of S.qualifications (Education block, AI facts, profile
+// summary) classifies rows by exact-matching `level` against
+// QUALIFICATION_LEVELS/LEVEL_ORDER — a level string that doesn't match any
+// of the 9 canonical values would otherwise silently vanish from some of
+// those (whitelist-based) while still leaking into others (blacklist-based).
+// This is the one place that guarantees every stored row's level is always
+// one of the 9 canonical values, so every consumer stays consistent.
+// Case-insensitive so "a-level"/"A Level" (no hyphen)/etc. still match;
+// anything genuinely unrecognized becomes "Other", never silently dropped.
+function normalizeQualLevel(level){
+  if(!level) return "A-level";
+  const match = QUALIFICATION_LEVELS.find(l => l.toLowerCase() === String(level).trim().toLowerCase());
+  return match || "Other";
+}
 let curStep = 0;
 /* Preview can show the form-built CV or the accepted AI rewrite. Exports
-   (PDF via print, Word) read #cv, so they follow whichever is active. */
+   (PDF via print, Word) read #cv, so they follow whichever is active.
+   Each version can also carry saved manual edits, which override the
+   generated HTML until the user resets. */
 let formCVHtml = "", aiCVHtml = "", viewMode = "form";
+const editedHtml = { form: "", ai: "" };
+let editMode = false, curTplKey = "modern"; // Modern = default — the safest well-styled single-column pick for UK recruiters
 const STEPS = ["Basics","Education","Projects","Experience","Interests"];
 
 const $ = id => document.getElementById(id);
-const esc = s => (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const esc = s => (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 const v = id => ($(id) ? $(id).value.trim() : "");
+const DOB_MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+// The date picker stores ISO (YYYY-MM-DD); the CV shows it UK-style ("12 March 2008").
+function formatDob(iso){
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||"");
+  if(!m) return iso||"";
+  const [,y,mo,d] = m;
+  return `${+d} ${DOB_MONTHS[+mo-1]||mo} ${y}`;
+}
+
+/* ---- rich profile box ----
+   Contenteditable, but exposes .value like a textarea so autosave, AI facts,
+   tailoring and import keep plain-text semantics. Only b/i/u/<br> survive
+   sanitisation — exactly what the preview, PDF and Word export understand. */
+function sanitizeRich(html){
+  const tmp=document.createElement("div"); tmp.innerHTML=html;
+  const walk=node=>{
+    let out="";
+    node.childNodes.forEach(ch=>{
+      if(ch.nodeType===3){ out+=esc(ch.textContent); return; }
+      if(ch.nodeType!==1) return;
+      const tag=ch.tagName;
+      if(tag==="BR"){ out+="<br>"; return; }
+      const inner=walk(ch);
+      if(tag==="B"||tag==="STRONG"){ if(inner) out+=`<b>${inner}</b>`; }
+      else if(tag==="I"||tag==="EM"){ if(inner) out+=`<i>${inner}</i>`; }
+      else if(tag==="U"){ if(inner) out+=`<u>${inner}</u>`; }
+      else if(/^(DIV|P)$/.test(tag)){ if(out&&!/(<br>)$/.test(out)) out+="<br>"; out+=inner; }
+      else out+=inner;
+    });
+    return out;
+  };
+  return walk(tmp).replace(/^(<br>)+/,"").replace(/(<br>)+$/,"");
+}
+function profileHtml(){ return sanitizeRich($("f_profile").innerHTML); }
+function profFmt(cmd){
+  $("f_profile").focus();
+  try{ document.execCommand("styleWithCSS", false, false); }catch(e){}
+  document.execCommand(cmd);
+}
+(function(){
+  const box=$("f_profile");
+  Object.defineProperty(box,"value",{
+    get(){
+      const t=document.createElement("div");
+      t.innerHTML=sanitizeRich(box.innerHTML).replace(/<br>/g,"\n");
+      return t.textContent;
+    },
+    set(text){ box.innerHTML=esc(text==null?"":String(text)).replace(/\n/g,"<br>"); }
+  });
+  // paste as plain text — formatting comes from the B/I/U buttons only
+  box.addEventListener("paste",e=>{
+    e.preventDefault();
+    const t=(e.clipboardData||window.clipboardData).getData("text/plain");
+    document.execCommand("insertText",false,t);
+  });
+})();
+
+/* ================= autosave / resume (this browser only) =================
+   Everything is saved to localStorage as the user types, and restored the
+   next time the page opens — CV data still never reaches our servers.
+   The licence key is deliberately excluded (memory-only promise). */
+const SAVE_KEY = "cvbuilder.v1";
+const SAVED_FIELDS = ["f_stage","f_name","f_dob","f_address","f_email","f_phone","f_links","f_profile","f_target",
+  "f_school","f_schooldates","f_gcse","f_quant","f_skills","f_responsibility","f_football","f_fitness",
+  "f_awards","f_interests","f_wordtpl","f_joburl","f_jobdesc"];
+let saveTimer = null, restoring = false;
+function saveState(){
+  const fields = {};
+  SAVED_FIELDS.forEach(id => { if($(id)) fields[id] = $(id).value; });
+  const snap = { fields, profileHtml: profileHtml(), qualifications:S.qualifications, projects:S.projects, jobs:S.jobs,
+                 editedHtml:{form:editedHtml.form, ai:editedHtml.ai},
+                 aiCVHtml, lastAIResult, viewMode, step:curStep,
+                 interview:{ transcript: IV.transcript, done: IV.done } };
+  try{
+    localStorage.setItem(SAVE_KEY, JSON.stringify(snap));
+    const el=$("saveStatus");
+    if(el) el.textContent = "💾 Saved in this browser ✓ " +
+      new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+  }catch(e){
+    const el=$("saveStatus");
+    if(el) el.textContent = "⚠ Couldn't autosave — browser storage is unavailable or full";
+  }
+}
+function scheduleSave(){
+  if(restoring) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveState, 600);
+}
+// Save immediately if a debounced save is still pending when the tab closes/hides,
+// so the last <600ms of typing isn't lost.
+function flushPendingSave(){
+  if(!saveTimer) return;
+  clearTimeout(saveTimer);
+  saveTimer = null;
+  saveState();
+}
+if(typeof window !== "undefined" && typeof window.addEventListener === "function"){
+  window.addEventListener("beforeunload", flushPendingSave);
+  window.addEventListener("pagehide", flushPendingSave);
+}
+function restoreState(){
+  let d = null;
+  try{ d = JSON.parse(localStorage.getItem(SAVE_KEY) || "null"); }catch(e){}
+  if(!d || !d.fields) return false;
+  restoring = true;
+  SAVED_FIELDS.forEach(id => {
+    if($(id) && typeof d.fields[id] === "string") $(id).value = d.fields[id];
+  });
+  // Rich profile formatting (b/i/u/line breaks) restores over the plain text.
+  if(typeof d.profileHtml === "string" && d.profileHtml) $("f_profile").innerHTML = sanitizeRich(d.profileHtml);
+  const rows = a => Array.isArray(a) ? a : [];
+  S.qualifications = migrateQualifications(d);
+  if(rows(d.projects).length) S.projects = rows(d.projects);
+  if(rows(d.jobs).length) S.jobs = rows(d.jobs);
+  const eh = d.editedHtml || {};
+  editedHtml.form = typeof eh.form === "string" ? eh.form : "";
+  editedHtml.ai = typeof eh.ai === "string" ? eh.ai : "";
+  aiCVHtml = typeof d.aiCVHtml === "string" ? d.aiCVHtml : "";
+  lastAIResult = typeof d.lastAIResult === "string" ? d.lastAIResult : "";
+  viewMode = (d.viewMode === "ai" && aiCVHtml) ? "ai" : "form";
+  curStep = Math.min(Math.max(+d.step || 0, 0), STEPS.length - 1);
+  if(d.interview && Array.isArray(d.interview.transcript)){
+    IV.transcript = d.interview.transcript.filter(m=>m && typeof m.content==="string");
+    IV.done = !!d.interview.done;
+  }
+  // If the saved profile is still the auto-written default, let it keep
+  // tracking role/subject changes rather than freezing it as "custom".
+  if(v("f_profile") && v("f_profile") === profileLine().trim()) lastAutoProfile = v("f_profile");
+  restoring = false;
+  return true;
+}
+function clearSaved(){
+  if(!confirm("Delete everything saved in this browser and start a blank CV?")) return;
+  try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+  // Some browsers restore just-typed field values across a reload — independent
+  // of our own localStorage and unaffected by autocomplete="off" — which made
+  // "Clear & start over" look like it silently failed. Flag it so the next
+  // load forces every tracked field blank regardless of what the browser tries
+  // to put back into them.
+  try{ sessionStorage.setItem("cvbuilder.justCleared","1"); }catch(e){}
+  location.reload();
+}
 
 /* ================= stepper / navigation ================= */
 function drawStepper(){
   $("stepper").innerHTML = STEPS.map((s,i)=>
-    `<div class="step-chip ${i===curStep?'active':''} ${i<curStep?'done':''}" onclick="goStep(${i})">${i<curStep?'✓ ':''}${s}</div>`
+    `<button type="button" class="step-chip ${i===curStep?'active':''} ${i<curStep?'done':''}"${i===curStep?' aria-current="step"':''} onclick="goStep(${i})">` +
+    `<span class="sc-num">${i<curStep?'✓ DONE':'STEP '+(i+1)}</span>${s}</button>`
   ).join("");
   document.querySelectorAll(".wstep").forEach(el=>{
     el.style.display = (+el.dataset.step === curStep) ? "block" : "none";
   });
   $("btnPrev").style.visibility = curStep===0 ? "hidden" : "visible";
   $("btnNext").style.visibility = curStep===STEPS.length-1 ? "hidden" : "visible";
+  scheduleSave();
 }
-function goStep(i){ curStep=i; drawStepper(); }
-function nav(d){ curStep=Math.min(Math.max(curStep+d,0),STEPS.length-1); drawStepper(); }
+/* Moves focus to the step's own heading so keyboard/screen-reader users land
+   somewhere meaningful instead of on a chip that just changed section. */
+function focusStepHeading(){
+  const h = document.querySelector(`.wstep[data-step="${curStep}"] h2`);
+  if(h){ h.setAttribute("tabindex","-1"); h.focus(); }
+}
+function goStep(i){ curStep=i; drawStepper(); focusStepHeading(); }
+function nav(d){ curStep=Math.min(Math.max(curStep+d,0),STEPS.length-1); drawStepper(); focusStepHeading(); }
 
-/* ================= repeatable rows ================= */
-function addALevel(subj="",grade=""){
-  S.alevels.push({subj,grade}); drawALevels();
+/* Backward compatibility: old saved sessions/imports used S.alevels
+   [{subj,grade}]. This is the single place that maps that old shape into
+   the current S.qualifications [{level,subject,grade,predicted}] shape —
+   restoreState() (localStorage) and applyImport() (pasted/extracted JSON)
+   both call it. Prefers a non-empty qualifications array over alevels
+   when both are present, so a snapshot that's already been migrated once
+   is never clobbered by a stale alevels key sitting alongside it. */
+function migrateQualifications(source){
+  if(!source) return [];
+  const quals = Array.isArray(source.qualifications) ? source.qualifications.filter(q=>q&&q.subject) : [];
+  if(quals.length){
+    return quals.map(q=>({
+      level: normalizeQualLevel(q.level),
+      subject: q.subject || "",
+      grade: q.grade || "",
+      predicted: !!q.predicted,
+    }));
+  }
+  const olds = Array.isArray(source.alevels) ? source.alevels.filter(a=>a&&a.subj) : [];
+  if(olds.length){
+    return olds.map(a=>({ level:"A-level", subject:a.subj||"", grade:a.grade||"", predicted:false }));
+  }
+  return [];
 }
-function drawALevels(){
-  $("list_alevels").innerHTML = S.alevels.map((a,i)=>`
+/* ================= repeatable rows ================= */
+function addQualification(level=defaultQualLevelForStage(),subject="",grade="",predicted=false){
+  S.qualifications.push({level,subject,grade,predicted}); drawQualifications();
+}
+function drawQualifications(){
+  $("list_qualifications").innerHTML = S.qualifications.map((q,i)=>`
     <div class="rep-item" style="padding:9px 12px">
-      <div class="row3">
-        <div class="field" style="margin:0"><input type="text" placeholder="Subject e.g. Mathematics" value="${esc(a.subj)}" oninput="S.alevels[${i}].subj=this.value; render()"></div>
-        <div class="field" style="margin:0"><input type="text" placeholder="A* (predicted)" value="${esc(a.grade)}" oninput="S.alevels[${i}].grade=this.value; render()"></div>
-        <button class="rm" style="position:static" onclick="S.alevels.splice(${i},1); drawALevels(); render()">✕</button>
+      <div class="row3" style="grid-template-columns:1fr 2fr 1fr auto">
+        <div class="field" style="margin:0"><select aria-label="Qualification level, row ${i+1}" onchange="S.qualifications[${i}].level=this.value; render()">${QUALIFICATION_LEVELS.map(lvl=>`<option value="${esc(lvl)}"${q.level===lvl?" selected":""}>${esc(lvl)}</option>`).join("")}</select></div>
+        <div class="field" style="margin:0"><input type="text" aria-label="Subject, row ${i+1}" placeholder="Subject e.g. Mathematics" value="${esc(q.subject)}" oninput="S.qualifications[${i}].subject=this.value; render()"></div>
+        <div class="field" style="margin:0"><input type="text" aria-label="Grade, row ${i+1}" placeholder="A* (predicted)" value="${esc(q.grade)}" oninput="S.qualifications[${i}].grade=this.value; render()"></div>
+        <button class="rm rm-grid" aria-label="Remove qualification row ${i+1}" onclick="S.qualifications.splice(${i},1); drawQualifications(); render()">✕</button>
       </div>
+      <label style="display:flex; align-items:center; gap:6px; margin-top:6px; font-size:13px">
+        <input type="checkbox"${q.predicted?" checked":""} onchange="S.qualifications[${i}].predicted=this.checked; render()"> Predicted grade
+      </label>
     </div>`).join("");
   render();
 }
@@ -568,12 +1326,12 @@ function addProject(){
 function drawProjects(){
   $("list_projects").innerHTML = S.projects.map((p,i)=>`
     <div class="rep-item">
-      <button class="rm" onclick="S.projects.splice(${i},1); drawProjects(); render()">✕ remove</button>
-      <div class="field"><label>Project title</label><input type="text" value="${esc(p.title)}" placeholder="e.g. A-Level statistics coursework: Premier League xG analysis" oninput="S.projects[${i}].title=this.value; render()"></div>
-      <div class="field"><label>What you actually did</label><textarea placeholder="e.g. Collected match data for 380 games, built a regression model comparing xG to actual goals" oninput="S.projects[${i}].desc=this.value; render()">${esc(p.desc)}</textarea></div>
+      <button class="rm" aria-label="Remove project ${i+1}" onclick="S.projects.splice(${i},1); drawProjects(); render()">✕ remove</button>
+      <div class="field"><label for="proj_title_${i}">Project title</label><input type="text" id="proj_title_${i}" value="${esc(p.title)}" placeholder="e.g. Stats coursework / EPQ: Premier League xG analysis" oninput="S.projects[${i}].title=this.value; render()"></div>
+      <div class="field"><label for="proj_desc_${i}">What you actually did</label><textarea id="proj_desc_${i}" placeholder="e.g. Collected match data for 380 games, built a regression model comparing xG to actual goals" oninput="S.projects[${i}].desc=this.value; render()">${esc(p.desc)}</textarea></div>
       <div class="row2">
-        <div class="field" style="margin:0"><label>Tools used</label><input type="text" value="${esc(p.tools)}" placeholder="Python, Excel, Claude AI" oninput="S.projects[${i}].tools=this.value; render()"></div>
-        <div class="field" style="margin:0"><label>Outcome / link <span class="opt">(optional)</span></label><input type="text" value="${esc(p.outcome)}" placeholder="A* awarded / github.com/…" oninput="S.projects[${i}].outcome=this.value; render()"></div>
+        <div class="field" style="margin:0"><label for="proj_tools_${i}">Tools used</label><input type="text" id="proj_tools_${i}" value="${esc(p.tools)}" placeholder="Python, Excel, Claude AI" oninput="S.projects[${i}].tools=this.value; render()"></div>
+        <div class="field" style="margin:0"><label for="proj_outcome_${i}">Outcome / link <span class="opt">(optional)</span></label><input type="text" id="proj_outcome_${i}" value="${esc(p.outcome)}" placeholder="A* awarded / github.com/…" oninput="S.projects[${i}].outcome=this.value; render()"></div>
       </div>
     </div>`).join("");
   render();
@@ -584,13 +1342,13 @@ function addJob(){
 function drawJobs(){
   $("list_jobs").innerHTML = S.jobs.map((j,i)=>`
     <div class="rep-item">
-      <button class="rm" onclick="S.jobs.splice(${i},1); drawJobs(); render()">✕ remove</button>
+      <button class="rm" aria-label="Remove job ${i+1}" onclick="S.jobs.splice(${i},1); drawJobs(); render()">✕ remove</button>
       <div class="row2">
-        <div class="field" style="margin:0 0 10px"><label>Role</label><input type="text" value="${esc(j.role)}" placeholder="e.g. Weekend team member" oninput="S.jobs[${i}].role=this.value; render()"></div>
-        <div class="field" style="margin:0 0 10px"><label>Organisation</label><input type="text" value="${esc(j.org)}" placeholder="e.g. Tesco Express" oninput="S.jobs[${i}].org=this.value; render()"></div>
+        <div class="field" style="margin:0 0 10px"><label for="job_role_${i}">Role</label><input type="text" id="job_role_${i}" value="${esc(j.role)}" placeholder="e.g. Weekend team member" oninput="S.jobs[${i}].role=this.value; render()"></div>
+        <div class="field" style="margin:0 0 10px"><label for="job_org_${i}">Organisation</label><input type="text" id="job_org_${i}" value="${esc(j.org)}" placeholder="e.g. Tesco Express" oninput="S.jobs[${i}].org=this.value; render()"></div>
       </div>
-      <div class="field"><label>Dates</label><input type="text" value="${esc(j.dates)}" placeholder="Jun 2024 – present" oninput="S.jobs[${i}].dates=this.value; render()"></div>
-      <div class="field" style="margin:0"><label>What you did <span class="opt">(1–2 lines)</span></label><textarea placeholder="e.g. Handled tills and stock rotation on weekend shifts; trained two new starters" oninput="S.jobs[${i}].desc=this.value; render()">${esc(j.desc)}</textarea></div>
+      <div class="field"><label for="job_dates_${i}">Dates</label><input type="text" id="job_dates_${i}" value="${esc(j.dates)}" placeholder="Jun 2024 – present" oninput="S.jobs[${i}].dates=this.value; render()"></div>
+      <div class="field" style="margin:0"><label for="job_desc_${i}">What you did <span class="opt">(1–2 lines)</span></label><textarea id="job_desc_${i}" placeholder="e.g. Handled tills and stock rotation on weekend shifts; trained two new starters" oninput="S.jobs[${i}].desc=this.value; render()">${esc(j.desc)}</textarea></div>
     </div>`).join("");
   render();
 }
@@ -598,7 +1356,7 @@ function drawJobs(){
 /* ================= banned-word watch ================= */
 const BANNED = ["leveraged","leverage","synergy","passionate","dynamic","results-driven","results driven","spearheaded","go-getter","think outside the box","guru","ninja","rockstar"];
 function checkBanned(){
-  const all = [v("f_quant"),v("f_responsibility"),v("f_football"),v("f_fitness"),v("f_awards"),v("f_interests"),v("f_skills"),
+  const all = [v("f_profile"),v("f_quant"),v("f_responsibility"),v("f_football"),v("f_fitness"),v("f_awards"),v("f_interests"),v("f_skills"),
     ...S.projects.map(p=>p.desc+" "+p.title), ...S.jobs.map(j=>j.desc)].join(" ").toLowerCase();
   const hits = BANNED.filter(w=>all.includes(w));
   const b = $("banWarn");
@@ -624,6 +1382,45 @@ const STEP3_COPY = {
     cvSection:"Projects & Technical Activity",
     quantHead:"Mathematics & competitions",
     promptLabel:"Maths/quant evidence"
+  },
+  accountancy:{
+    title:"3 · Projects & numerical evidence",
+    hint:'Real things with numbers you handled honestly — "good with money" is not an entry; "tracked £400 over two terms" is.',
+    projLabel:"Projects (treasurer roles, budgets kept, Young Enterprise accounts, spreadsheets built…)",
+    quantLabel:"Mathematics & money evidence",
+    quantPh:"e.g. UKMT Senior Maths Challenge — Silver, 2025; chess club treasurer handling £400/term; built a family budget tracker in Excel",
+    quantHint:"Maths competitions, treasurer or cash-handling roles, any budget or accounts you kept.",
+    skillsLabel:"Numerical skills & tools",
+    skillsPh:"e.g. Excel (formulas, pivot tables), Google Sheets, basic bookkeeping, accurate data entry",
+    cvSection:"Projects & Numerical Evidence",
+    quantHead:"Mathematics & money evidence",
+    promptLabel:"Maths/money evidence"
+  },
+  actuarial:{
+    title:"3 · Projects & mathematical evidence",
+    hint:'Real mathematical work you can show — "good at maths" is not an entry; "UKMT Gold, 2025" or "EPQ modelling real data" is.',
+    projLabel:"Projects (statistics coursework, data modelling, EPQ with data, coding experiments…)",
+    quantLabel:"Mathematics & statistics evidence",
+    quantPh:"e.g. UKMT Senior Maths Challenge — Gold, 2025; Further Maths A Level; EPQ modelling life-expectancy data",
+    quantHint:"Olympiads/UKMT, Further Maths, STEP/MAT prep, statistics or probability projects.",
+    skillsLabel:"Technical skills & tools",
+    skillsPh:"e.g. Excel, statistics (probability, distributions), Python or R basics",
+    cvSection:"Projects & Mathematical Evidence",
+    quantHead:"Mathematics & statistics",
+    promptLabel:"Maths/statistics evidence"
+  },
+  quantfinance:{
+    title:"3 · Projects & quantitative evidence",
+    hint:'Real quantitative work you can show — "interested in markets" is not an entry; "ran a paper portfolio, tracked results weekly" is.',
+    projLabel:"Projects (investment club, trading simulations, data analysis, EPQ, coding…)",
+    quantLabel:"Mathematics & markets evidence",
+    quantPh:"e.g. UKMT Senior Maths Challenge — Gold, 2025; ran investment-club paper portfolio for a term with weekly tracking; Kaggle entry",
+    quantHint:"Maths competitions, investment/enterprise clubs, anything tracked with real numbers.",
+    skillsLabel:"Quantitative skills & tools",
+    skillsPh:"e.g. Excel, Python (pandas), statistics, reading company accounts basics",
+    cvSection:"Projects & Quantitative Evidence",
+    quantHead:"Mathematics & markets evidence",
+    promptLabel:"Maths/markets evidence"
   },
   office:{
     title:"3 · Projects & organisation",
@@ -691,9 +1488,44 @@ const STEP3_COPY = {
     promptLabel:"Competitions/showcases"
   }
 };
+/* The target-role box is a free-text input with datalist suggestions, so the
+   user can pick a known role or type their own. targetKey() maps whatever
+   they typed onto the closest built-in wording set ("" = no match). */
+const TARGET_ROLES = {
+  general:"General early-career role",
+  apprenticeship:"Apprenticeship (incl. degree apprenticeships)",
+  university:"University interview / admissions",
+  analytical:"Analytical / data role",
+  accountancy:"Accountancy / finance (trainee accountant)",
+  actuarial:"Actuarial (trainee actuary)",
+  quantfinance:"Banking / quantitative finance",
+  office:"Office / admin role",
+  retail:"Retail / customer service",
+  hospitality:"Hospitality / catering",
+  trades:"Skilled trades / engineering",
+  creative:"Creative / media role"
+};
+function targetKey(){
+  const t = v("f_target").toLowerCase();
+  if(!t) return "general";
+  if(TARGET_ROLES[t]) return t;
+  for(const k in TARGET_ROLES){ if(TARGET_ROLES[k].toLowerCase() === t) return k; }
+  if(/actuar/.test(t)) return "actuarial";
+  if(/account|book-?keep|audit/.test(t)) return "accountancy";
+  if(/bank|quant|trading|trader|invest/.test(t)) return "quantfinance";
+  if(/data|analy|statist/.test(t)) return "analytical";
+  if(/apprentice/.test(t)) return "apprenticeship";
+  if(/universit|admission|ucas/.test(t)) return "university";
+  if(/office|admin|clerical|receptionist/.test(t)) return "office";
+  if(/retail|customer|shop|sales assistant/.test(t)) return "retail";
+  if(/hospitalit|cater|barista|kitchen|chef|waiter|waitress|bar staff/.test(t)) return "hospitality";
+  if(/trade|engineer|electric|plumb|mechanic|construct|carpent|weld/.test(t)) return "trades";
+  if(/creativ|media|design|film|music|art|writ|photo/.test(t)) return "creative";
+  return "";
+}
+function targetText(){ return v("f_target") || TARGET_ROLES.general; }
 function step3Copy(){
-  const t = v("f_target");
-  return Object.assign({}, STEP3_COPY.default, STEP3_COPY[t] || {});
+  return Object.assign({}, STEP3_COPY.default, STEP3_COPY[targetKey()] || {});
 }
 function applyStep3Copy(){
   const c = step3Copy();
@@ -708,33 +1540,147 @@ function applyStep3Copy(){
 }
 
 /* ================= profile line by target ================= */
+// Builds the opening sentence from whatever qualifications the student has
+// actually entered — A-levels/Highers/BTEC/T-Level (and equivalents) if
+// present, else GCSEs (the free-text summary wins over individual rows),
+// else National 5/Other rows. No wording assumes every user is an A-level
+// student.
+function profileQualificationsBase(){
+  const higher = S.qualifications.filter(q=>q.subject && HIGHER_TIER_LEVELS.includes(q.level));
+  if(higher.length){
+    const levels = new Set(higher.map(q=>q.level));
+    const label = levels.size===1 ? [...levels][0] : "Sixth-form";
+    return label + " student studying " + higher.map(qualRowText).join(", ") + ".";
+  }
+  const gcseSummary = v("f_gcse");
+  if(gcseSummary) return "GCSE student — " + gcseSummary + ".";
+  const gcseRows = S.qualifications.filter(q=>q.subject && q.level==="GCSE");
+  if(gcseRows.length) return "GCSE student studying " + gcseRows.map(qualRowText).join(", ") + ".";
+  const otherRows = S.qualifications.filter(q=>q.subject && !HIGHER_TIER_LEVELS.includes(q.level) && q.level!=="GCSE");
+  if(otherRows.length){
+    const levels = new Set(otherRows.map(q=>q.level));
+    const label = levels.size===1 ? [...levels][0] : "School leaver";
+    return label + " student studying " + otherRows.map(qualRowText).join(", ") + ".";
+  }
+  return "";
+}
 function profileLine(){
-  const grades = S.alevels.filter(a=>a.subj).map(a=>a.subj+(a.grade?" ("+a.grade+")":"")).join(", ");
-  const t = v("f_target") || "general";
-  if(!grades) return "";
-  const base = "A Level student studying " + grades + ".";
+  const base = profileQualificationsBase();
+  const t = targetKey();
+  if(!base) return "";
   const tail = {
     general:" A reliable, hardworking school leaver with a record of self-directed projects and commitments outside school.",
     apprenticeship:" Seeking an apprenticeship combining paid work with study, offering practical skills and a record of disciplined, self-directed work.",
     university:" Applying analytical and independent study skills developed through coursework, self-directed projects and activities outside school.",
     analytical:" Seeking an entry-level analytical role, bringing strong mathematical reasoning, hands-on data work and disciplined self-directed learning.",
+    accountancy:" Seeking a trainee accountancy role, offering strong numerical accuracy, confident spreadsheet work and a methodical, double-checked approach to money and detail.",
+    actuarial:" Seeking an actuarial trainee path, offering strong mathematics — particularly statistics and probability — persistence with hard problems and precise, methodical working.",
+    quantfinance:" Seeking a banking or quantitative finance role, offering strong mathematics, hands-on data work and a disciplined, accuracy-first approach under deadlines.",
     office:" Seeking an office-based role, offering strong organisation, clear written communication and a dependable, detail-focused approach.",
     retail:" Seeking a retail or customer service role, offering a friendly, dependable manner and confidence dealing with people.",
     hospitality:" Seeking a hospitality role, offering reliability under pressure, teamwork and a commitment to good service.",
     trades:" Seeking a hands-on trade or engineering role, offering practical problem-solving, care over detail and a willingness to learn on the job.",
     creative:" Seeking a creative role, offering original ideas, self-directed projects and the discipline to finish work to deadline."
   };
-  return base + (tail[t] || tail.general);
+  if(t) return base + (tail[t] || tail.general);
+  // Free-typed role with no built-in match — name it in a generic tail.
+  const typed = v("f_target").replace(/\s+roles?$/i, "");
+  const article = /^[aeiou]/i.test(typed) ? "an" : "a";
+  return base + ` Seeking ${article} ${typed} role, offering a record of self-directed projects and dependable commitments outside school.`;
+}
+
+/* ================= shared AI "facts" helpers =================
+   buildPrompt(), suggestAI()'s context builder and tailorFacts() each send
+   their own opaque facts/context string to the server — but all three need
+   the same qualifications summary and stage line, so it's built once here
+   instead of being hand-rolled three times (and drifting out of sync). */
+const STAGE_LABELS = {
+  gcse: "Finishing GCSEs / Year 11",
+  alevel: "A-levels or college (Year 12–13)",
+  scottish: "Scottish school (Nat 5s / Highers)",
+  other: "Other / not in school",
+};
+function stageFactsLine(){
+  return "STAGE: " + (STAGE_LABELS[v("f_stage")] || STAGE_LABELS.alevel);
+}
+// New blank qualification rows start on the level a student at this stage
+// is most likely adding, instead of always defaulting to "A-level" — a
+// GCSE-stage student gets "GCSE" pre-selected, a Scottish-stage student
+// gets "National 5", so most rows need no dropdown change at all.
+const STAGE_DEFAULT_LEVEL = { gcse: "GCSE", alevel: "A-level", scottish: "National 5", other: "A-level" };
+function defaultQualLevelForStage(){
+  return STAGE_DEFAULT_LEVEL[v("f_stage")] || "A-level";
+}
+function qualificationsFactsLine(){
+  // Same f_gcse-wins precedence as render()'s Education block: when the
+  // free-text GCSE summary is filled in, it replaces individual GCSE rows
+  // in the "GCSEs:" segment rather than sitting alongside them (never both
+  // — same precedence rule as render()/profileLine()). Unlike round 1's
+  // fix, this function now absorbs the GCSE summary into its own returned
+  // string instead of assuming every caller separately sends its own
+  // "GCSEs: <summary>" line — that assumption was true for buildPrompt()/
+  // tailorFacts() but not suggestAI(), which silently lost all GCSE
+  // information whenever a student used the summary box instead of
+  // individual rows. Callers must NOT also append their own GCSE line.
+  const gcseSummary = v("f_gcse");
+  const rows = S.qualifications.filter(q=>q.subject);
+  const groups = LEVEL_ORDER.map(lvl=>{
+    if(lvl==="GCSE"){
+      if(gcseSummary) return "GCSEs: " + gcseSummary;
+      const gcseRows = rows.filter(q=>q.level==="GCSE");
+      return gcseRows.length ? qualLevelLabel("GCSE") + ": " + gcseRows.map(qualRowText).join(", ") : "";
+    }
+    const group = rows.filter(q=>q.level===lvl);
+    return group.length ? qualLevelLabel(lvl) + ": " + group.map(qualRowText).join(", ") : "";
+  }).filter(Boolean);
+  return groups.length ? groups.join("; ") : "none listed";
+}
+
+/* The profile box is auto-filled with the generated line as an editable
+   default. It keeps tracking role/qualification changes until the user
+   types their own wording — after that their text is never overwritten. */
+let lastAutoProfile = "";
+function syncProfileDefault(){
+  const box = $("f_profile");
+  if(!box || document.activeElement === box) return; // never fight the user's cursor
+  const cur = box.value.trim();
+  if(cur && cur !== lastAutoProfile) return;         // customised — hands off
+  const def = profileLine();
+  if(cur !== def) box.value = def;
+  lastAutoProfile = def;
 }
 
 /* ================= CV render ================= */
 function bulletify(text){
   return text.split(/\n|;(?=\s)/).map(s=>s.trim()).filter(Boolean);
 }
+/* Skills are typed as a comma list but shown as capitalised bullets —
+   only the first letter is raised so acronyms (SQL) and brands stay intact. */
+function skillList(text){
+  return text.split(/[,;\n]+/).map(s=>s.trim()).filter(Boolean)
+    .map(s=>s.charAt(0).toUpperCase()+s.slice(1));
+}
 function render(){
   checkBanned();
-  const name = v("f_name"), city=v("f_city"), email=v("f_email"), phone=v("f_phone"), links=v("f_links");
-  const contact = [city,email,phone,links].filter(Boolean).map(x=>`<span>${esc(x)}</span>`).join("");
+  syncProfileDefault();
+  // GCSE-stage students enter their GCSEs as individual Qualifications rows;
+  // the one-line summary is redundant there and only relevant once GCSEs are
+  // a background credential (A-levels/BTEC/Scottish/other stages).
+  const gcseStage = v("f_stage")==="gcse";
+  $("gcseSummaryField").style.display = gcseStage ? "none" : "";
+  $("s2_hint").textContent = gcseStage
+    ? "School and your GCSEs — add each one as a Qualification below."
+    : "School, qualifications and GCSE headline only — no need to list every GCSE.";
+  const name = v("f_name"), dob=v("f_dob"), address=v("f_address"), email=v("f_email"), phone=v("f_phone"), links=v("f_links");
+  // One field per row, labelled where the value alone wouldn't be self-evident —
+  // ATS parsers and the health check read each row as its own line either way.
+  const contact = [
+    dob && `DOB: ${esc(formatDob(dob))}`,
+    address && `Address: ${esc(address)}`,
+    email && `Email Id: ${esc(email)}`,
+    phone && `Phone: ${esc(phone)}`,
+    links && esc(links)
+  ].filter(Boolean).map(row=>`<div class="cv-contact-row">${row}</div>`).join("");
   // Each section is wrapped in a .cv-sec-block with a stable sb-* slug so
   // structural templates (sidebar, banner) can move blocks around.
   const block = (slug, inner) => inner ? `<div class="cv-sec-block sb-${slug}">${inner}</div>` : "";
@@ -742,17 +1688,29 @@ function render(){
   h += `<div class="cv-header"><div class="cv-name">${esc(name)||'<span class="cv-empty">Your name</span>'}</div>` +
        `<div class="cv-contact">${contact||'<span class="cv-empty">Contact details appear here</span>'}</div></div>`;
 
-  const prof = profileLine();
-  if(prof){ h += block("profile", `<h3 class="cv-sec">Profile</h3><p class="cv-profile">${esc(prof)}</p>`); }
+  // A hand-written profile summary always beats the auto-generated line.
+  // profileHtml() is already sanitised (only b/i/u/<br> survive).
+  const prof = profileHtml() || esc(profileLine());
+  if(prof){ h += block("profile", `<h3 class="cv-sec">Profile</h3><p class="cv-profile">${prof}</p>`); }
 
   /* Education */
   const school=v("f_school"), sdates=v("f_schooldates"), gcse=v("f_gcse");
-  const als = S.alevels.filter(a=>a.subj);
-  if(school||als.length||gcse){
+  const quals = S.qualifications.filter(q=>q.subject);
+  const gcseRows = quals.filter(q=>q.level==="GCSE");
+  const nonGcseRows = quals.filter(q=>q.level!=="GCSE");
+  if(school||nonGcseRows.length||gcseRows.length||gcse){
     let s = `<h3 class="cv-sec">Education</h3><div class="cv-entry">`;
     if(school) s += `<div class="cv-entry-head"><b>${esc(school)}</b><span class="dates">${esc(sdates)}</span></div>`;
-    if(als.length) s += `<div class="grades-line"><b>A Levels:</b> ${als.map(a=>esc(a.subj)+(a.grade?" — "+esc(a.grade):"")).join("; ")}</div>`;
+    // Highest level first; GCSEs (summary line or individual rows) always
+    // come last — the free-text f_gcse summary takes precedence over
+    // individual GCSE rows whenever it's filled in, so the two never both
+    // render at once.
+    LEVEL_ORDER.filter(lvl=>lvl!=="GCSE").forEach(lvl=>{
+      const rows = nonGcseRows.filter(q=>q.level===lvl);
+      if(rows.length) s += `<div class="grades-line"><b>${esc(qualLevelLabel(lvl))}:</b> ${rows.map(q=>esc(q.subject)+(gradeText(q)?" — "+esc(gradeText(q)):"")).join("; ")}</div>`;
+    });
     if(gcse) s += `<div class="grades-line"><b>GCSEs:</b> ${esc(gcse)}</div>`;
+    else if(gcseRows.length) s += `<div class="grades-line"><b>GCSEs:</b> ${gcseRows.map(q=>esc(q.subject)+(gradeText(q)?" — "+esc(gradeText(q)):"")).join("; ")}</div>`;
     s += `</div>`;
     h += block("education", s);
   }
@@ -788,7 +1746,14 @@ function render(){
     h += block("experience", s);
   }
 
-  /* Interests */
+  /* Skills */
+  const sk=v("f_skills");
+  if(sk){
+    const skills = skillList(sk);
+    if(skills.length) h += block("skills", `<h3 class="cv-sec">Skills</h3><ul>${skills.map(s=>`<li>${esc(s)}</li>`).join("")}</ul>`);
+  }
+
+  /* Interests — always the final section: UK convention puts them last. */
   const fb=v("f_football"), fit=v("f_fitness"), aw=v("f_awards"), oi=v("f_interests");
   if(fb||fit||aw||oi){
     let s = `<h3 class="cv-sec">Interests &amp; Achievements</h3><ul>`;
@@ -800,10 +1765,6 @@ function render(){
     h += block("interests", s);
   }
 
-  /* Skills */
-  const sk=v("f_skills");
-  if(sk){ h += block("skills", `<h3 class="cv-sec">Skills</h3><p class="cv-inline-list">${esc(sk)}</p>`); }
-
   if(!name && !school && !projs.length){
     h += `<p class="cv-empty" style="margin-top:30px">Start filling in the form — your CV appears here as you type.</p>`;
   }
@@ -813,7 +1774,7 @@ function render(){
 }
 
 /* ================= preview version switching ================= */
-function currentTpl(){ return WORD_TEMPLATES[v("f_wordtpl")] || WORD_TEMPLATES.classic; }
+function currentTpl(){ return WORD_TEMPLATES[v("f_wordtpl")] || WORD_TEMPLATES.modern; }
 /* Structural templates rearrange the flat section blocks: "banner" wraps the
    body, "sidebar" splits blocks into a side column + main column. */
 function layoutCV(html){
@@ -837,22 +1798,110 @@ function layoutCV(html){
   return headerHtml + `<div class="cv-cols">${side.outerHTML}${main.outerHTML}</div>`;
 }
 function renderPreview(){
-  const base = (viewMode === "ai" && aiCVHtml) ? aiCVHtml : formCVHtml;
+  if(editMode) return; // never clobber in-progress manual edits
+  const useAI = viewMode === "ai" && aiCVHtml;
+  const base = useAI ? (editedHtml.ai || aiCVHtml) : (editedHtml.form || formCVHtml);
   $("cv").innerHTML = layoutCV(base);
   $("vtForm").classList.toggle("active", viewMode !== "ai");
   $("vtAI").classList.toggle("active", viewMode === "ai");
   $("vtAI").disabled = !aiCVHtml;
+  renderEditBar();
+  scheduleSave();
 }
 function setView(mode){
+  if(editMode){ setFlash("Save or discard your preview edits first", true); return; }
   if(mode === "ai" && !aiCVHtml) return;
   viewMode = mode;
   renderPreview();
 }
 
+/* ================= manual preview editing =================
+   The user can click into the preview and retype anything. Saved edits are
+   stored per version (form / AI) in flat "flow" form so template switching
+   still works, and they override the generated HTML until reset. Exports
+   read #cv, so they always ship exactly what's shown. */
+function renderEditBar(){
+  const bar = $("editBar"); if(!bar) return;
+  if(editMode){
+    // onmousedown preventDefault keeps the text selection in the preview so
+    // the command applies to what the user highlighted.
+    const fmt=(cmd,label,title,style)=>
+      `<button class="btn small ghost" title="${title}" style="min-width:34px;${style||""}" `+
+      `onmousedown="event.preventDefault()" onclick="document.execCommand('${cmd}')">${label}</button>`;
+    bar.innerHTML =
+      `<button class="btn small green" onclick="saveEdit()">💾 Save edits</button>` +
+      `<button class="btn small ghost" onclick="discardEdit()">✕ Discard</button>` +
+      fmt("bold","B","Bold (Ctrl+B)","font-weight:800") +
+      fmt("italic","I","Italic (Ctrl+I)","font-style:italic") +
+      fmt("underline","U","Underline (Ctrl+U)","text-decoration:underline") +
+      fmt("insertUnorderedList","• List","Turn into a bullet list") +
+      fmt("removeFormat","⌫","Remove formatting from selection") +
+      `<span class="edit-note">Select text, then B / I / U / bullets — PDF and Word export exactly what you see.</span>`;
+    return;
+  }
+  const label = viewMode === "ai" ? "AI" : "form";
+  bar.innerHTML =
+    `<button class="btn small" onclick="startEdit()">✏️ Edit this version</button>` +
+    (editedHtml[viewMode]
+      ? `<button class="btn small ghost" onclick="resetEdit()">↺ Back to ${viewMode === "ai" ? "AI original" : "form version"}</button>` +
+        `<span class="edit-note">Showing your edited ${label} version — ${viewMode === "ai" ? "regenerating with AI replaces it" : "form changes are paused until you go back"}.</span>`
+      : "");
+}
+function startEdit(){
+  if(editMode) return;
+  editMode = true;
+  const cv = $("cv");
+  cv.contentEditable = "true";
+  cv.classList.add("editing");
+  cv.focus();
+  // Emit real <b>/<i>/<u> tags (not style spans) so the Word export sees them.
+  try{ document.execCommand("styleWithCSS", false, false); }catch(e){}
+  renderEditBar();
+}
+function stopEdit(){
+  editMode = false;
+  const cv = $("cv");
+  cv.contentEditable = "false";
+  cv.classList.remove("editing");
+}
+function saveEdit(){
+  editedHtml[viewMode] = unlayoutCV($("cv").innerHTML);
+  stopEdit();
+  renderPreview();
+  setFlash(viewMode === "ai"
+    ? "AI version edits saved ✓ — PDF and Word now export your edited version"
+    : "Edits saved ✓ — the preview now overrides the form until you go back");
+}
+function discardEdit(){
+  stopEdit();
+  renderPreview();
+}
+function resetEdit(){
+  editedHtml[viewMode] = "";
+  renderPreview();
+  setFlash(viewMode === "ai" ? "Reset to the AI original ✓" : "Reset ✓ — the preview follows the form again");
+}
+/* Inverse of layoutCV: flatten a structural (sidebar/banner) arrangement back
+   to header + flat section blocks so any template can re-lay it out. */
+function unlayoutCV(html){
+  const tmp = document.createElement("div"); tmp.innerHTML = html;
+  const header = tmp.querySelector(".cv-header");
+  const headerHtml = header ? header.outerHTML : "";
+  if(header) header.remove();
+  const cols = tmp.querySelector(".cv-cols");
+  if(cols){
+    const side = cols.querySelector(".cv-side"), main = cols.querySelector(".cv-main");
+    return headerHtml + (side ? side.innerHTML : "") + (main ? main.innerHTML : "");
+  }
+  const body = tmp.querySelector(".cv-body");
+  if(body) return headerHtml + body.innerHTML;
+  return headerHtml + tmp.innerHTML;
+}
+
 /* ================= gaps analysis ================= */
 function renderGaps(){
   const gaps=[], actions=[];
-  const target = v("f_target");
+  const target = targetKey();
   if(!S.projects.filter(p=>p.title||p.desc).length && ["analytical","apprenticeship","university","trades","creative"].includes(target)){
     gaps.push("No projects listed — for this kind of application a project is usually the deciding section.");
     actions.push("Build one small project you can show (e.g. a data analysis, a build, or a portfolio piece) — 2–3 weekends of work.");
@@ -881,7 +1930,7 @@ function renderGaps(){
   </div>`;
 }
 
-/* ================= export: text + Claude prompt ================= */
+/* ================= export: CV as plain text / AI facts ================= */
 function cvAsText(){
   const tmp=document.createElement("div"); tmp.innerHTML=$("cv").innerHTML;
   tmp.querySelectorAll("h3").forEach(h=>h.textContent="\n"+h.textContent.toUpperCase()+"\n");
@@ -891,11 +1940,15 @@ function cvAsText(){
 }
 function buildPrompt(){
   const facts = {
-    name:v("f_name"), city:v("f_city"), email:v("f_email"), phone:v("f_phone"), links:v("f_links"),
-    target:$("f_target").options[$("f_target").selectedIndex].text,
+    name:v("f_name"), email:v("f_email"), phone:v("f_phone"), links:v("f_links"),
+    target:targetText(),
+    profile:v("f_profile")||"NONE",
     school:v("f_school"), dates:v("f_schooldates"),
-    alevels:S.alevels.filter(a=>a.subj).map(a=>a.subj+(a.grade?": "+a.grade:"")).join("; ")||"NONE",
-    gcse:v("f_gcse")||"NONE",
+    stage:stageFactsLine(),
+    // qualificationsFactsLine() already folds the f_gcse summary (or
+    // individual GCSE rows) into this string — see its own comment — so
+    // there is deliberately no separate "gcse" field here any more.
+    qualifications:qualificationsFactsLine(),
     projects:S.projects.filter(p=>p.title||p.desc).map(p=>`${p.title} — ${p.desc}${p.tools?" [Tools: "+p.tools+"]":""}${p.outcome?" [Outcome: "+p.outcome+"]":""}`).join("\n  ")||"NONE",
     quant:v("f_quant")||"NONE",
     jobs:S.jobs.filter(j=>j.role||j.org).map(j=>`${j.role}, ${j.org} (${j.dates}) — ${j.desc}`).join("\n  ")||"NONE",
@@ -915,11 +1968,12 @@ STRICT RULES:
 - If asked to make anything sound more impressive than the facts support, push back and offer a truthful stronger framing.
 
 FACTS:
-Name: ${facts.name} | Location: ${facts.city} | Email: ${facts.email} | Phone: ${facts.phone} | Links: ${facts.links||"NONE"}
+Name: ${facts.name} | Email: ${facts.email} | Phone: ${facts.phone} | Links: ${facts.links||"NONE"}
 Target: ${facts.target}
+Profile summary written by the candidate (if not NONE, use it as the basis of the profile section): ${facts.profile}
 School: ${facts.school} (${facts.dates})
-A Levels: ${facts.alevels}
-GCSEs: ${facts.gcse}
+${facts.stage}
+Qualifications: ${facts.qualifications}
 Projects:
   ${facts.projects}
 ${step3Copy().promptLabel}: ${facts.quant}
@@ -930,7 +1984,23 @@ Sport/activity: ${facts.football}
 Fitness: ${facts.fitness}
 Awards/other: ${facts.awards}
 Other interests: ${facts.interests}
-Technical skills: ${facts.skills}`;
+Technical skills: ${facts.skills}${jobAdBlock()}`;
+}
+/* When a job advert is supplied, the AI rewrite tailors emphasis and wording
+   to it — matching only; the advert must never add facts to the CV. */
+function jobAdBlock(){
+  const job = v("f_jobdesc").slice(0, 12000);
+  if(!job) return "";
+  return `
+
+JOB ADVERT THE CANDIDATE IS APPLYING FOR (tailor the CV to this):
+${job}
+
+TAILORING RULES:
+- Word the profile and order every section's bullets so the evidence most relevant to THIS advert comes first.
+- Mirror the advert's terminology only where the supplied facts truthfully support it.
+- Never add a skill, tool or experience from the advert that is not in the facts above.
+- In the feedback section, name any advert requirements the facts cannot evidence.`;
 }
 function setFlash(msg, isErr){
   const f=$("copiedFlash"); f.textContent=msg;
@@ -946,9 +2016,6 @@ function fallbackCopy(t,done){
   const ta=document.createElement("textarea"); ta.value=t; document.body.appendChild(ta);
   ta.select(); document.execCommand("copy"); document.body.removeChild(ta); done();
 }
-function copyPrompt(){ copyToClipboard(buildPrompt(),"Claude prompt copied ✓ — paste it into a new Claude chat"); }
-function copyText(){ copyToClipboard(cvAsText()); }
-
 /* ---------- shared export helpers ---------- */
 function fileBase(){
   const n=v("f_name")||"cv";
@@ -961,115 +2028,401 @@ function downloadBlob(blob,filename){
   setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },800);
 }
 
-/* ---------- Word (.doc) export — offline, no libraries ---------- */
-/* Shared page layout; each template supplies typography + colours on top. */
-const WORD_BASE_CSS = `
-  @page{size:A4; margin:2cm 2.2cm;}
-  .cv-contact{margin:2pt 0 10pt;}
-  .cv-entry{margin-bottom:6pt;}
-  ul{margin:2pt 0 4pt 18pt; padding:0;}
-  li{margin-bottom:1pt;}
-`;
+/* ---------- Word (.docx) export — offline, no libraries ----------
+   Builds a genuine Office Open XML package (a stored ZIP of XML parts), so
+   the download opens everywhere real .docx files do: Microsoft Word, Google
+   Docs, LibreOffice, Pages, phone viewers and ATS parsers. (The old export
+   was HTML dressed up with a .doc extension — only Word itself tolerated it.)
+   Each template's `d` block mirrors its on-screen skin. Units follow OOXML:
+   sizes in half-points, spacing/margins in twips (1/20 pt), borders in 1/8 pt. */
 const WORD_TEMPLATES = {
-  classic:{ label:"Classic", css:`
-    body{font-family:Georgia,'Times New Roman',serif; font-size:11pt; color:#1c2430; line-height:1.4;}
-    .cv-name{font-size:20pt; font-weight:bold; color:#16324f;}
-    .cv-contact{font-size:9.5pt; color:#4a5568;}
-    h3.cv-sec{font-size:10pt; text-transform:uppercase; letter-spacing:1.5pt; color:#16324f; border-bottom:1pt solid #16324f; padding-bottom:2pt; margin:12pt 0 5pt; font-family:Arial,Helvetica,sans-serif;}
-    .cv-profile,li,.grades-line,.cv-inline-list{font-size:10.5pt;}
-    .cv-entry-head b{font-size:11pt;}
-    .dates{color:#5a6474; font-style:italic; font-size:9.5pt;}
-  `},
-  modern:{ label:"Modern", css:`
-    body{font-family:Calibri,Arial,Helvetica,sans-serif; font-size:11pt; color:#222c38; line-height:1.45;}
-    .cv-name{font-size:22pt; font-weight:bold; color:#0e7490;}
-    .cv-contact{font-size:9.5pt; color:#55606e;}
-    h3.cv-sec{font-size:11pt; font-weight:bold; color:#0e7490; border-bottom:2pt solid #0e7490; padding-bottom:2pt; margin:12pt 0 5pt;}
-    .cv-profile,li,.grades-line,.cv-inline-list{font-size:10.5pt;}
-    .cv-entry-head b{font-size:11pt; color:#111a24;}
-    .dates{color:#55606e; font-size:9.5pt;}
-  `},
-  minimal:{ label:"Minimal", css:`
-    body{font-family:Arial,Helvetica,sans-serif; font-size:11pt; color:#000; line-height:1.4;}
-    .cv-name{font-size:18pt; font-weight:bold;}
-    .cv-contact{font-size:10pt;}
-    h3.cv-sec{font-size:11.5pt; font-weight:bold; margin:12pt 0 4pt;}
-    .cv-profile,li,.grades-line,.cv-inline-list{font-size:10.5pt;}
-    .cv-entry-head b{font-size:11pt;}
-    .dates{font-size:10pt;}
-  `},
-  sidebar:{ label:"Sidebar", layout:"sidebar", side:["skills","interests"], headerBg:"#22384c", sideBg:"#2c4258", css:`
-    body{font-family:Calibri,Arial,Helvetica,sans-serif; font-size:11pt; color:#222c38; line-height:1.45;}
-    .cv-header-td .cv-name{font-size:22pt; font-weight:bold; color:#ffffff;}
-    .cv-header-td .cv-contact{font-size:9.5pt; color:#c9d4e0;}
-    .cv-side-td{color:#e9eef4; font-size:10pt;}
-    .cv-side-td h3.cv-sec{color:#ffffff; border-bottom:1pt solid #8fa3b8;}
-    h3.cv-sec{font-size:10.5pt; text-transform:uppercase; letter-spacing:1pt; color:#22384c; border-bottom:1pt solid #22384c; padding-bottom:2pt; margin:10pt 0 5pt;}
-    .cv-profile,li,.grades-line,.cv-inline-list{font-size:10.5pt;}
-    .cv-entry-head b{font-size:11pt;}
-    .dates{color:#55606e; font-size:9.5pt;}
-  `},
-  banner:{ label:"Banner", layout:"banner", headerBg:"#1d63b8", css:`
-    body{font-family:Calibri,Arial,Helvetica,sans-serif; font-size:11pt; color:#222c38; line-height:1.45;}
-    .cv-header-td{text-align:center;}
-    .cv-header-td .cv-name{font-size:24pt; font-weight:bold; color:#ffffff;}
-    .cv-header-td .cv-contact{font-size:9.5pt; color:#d7e5f7;}
-    h3.cv-sec{font-size:11.5pt; font-weight:bold; color:#1d63b8; border-bottom:2pt solid #1d63b8; padding-bottom:2pt; margin:11pt 0 5pt;}
-    .cv-profile,li,.grades-line,.cv-inline-list{font-size:10.5pt;}
-    .cv-entry-head b{font-size:11pt;}
-    .dates{color:#55606e; font-size:9.5pt;}
-  `},
-  elegant:{ label:"Elegant", css:`
-    body{font-family:'Palatino Linotype','Book Antiqua',Georgia,serif; font-size:11pt; color:#2a2326; line-height:1.45;}
-    .cv-name{font-size:21pt; font-weight:bold; color:#6b1f2a; text-align:center;}
-    .cv-contact{font-size:9.5pt; color:#5e5257; text-align:center;}
-    h3.cv-sec{font-size:10.5pt; text-transform:uppercase; letter-spacing:2pt; color:#6b1f2a; border-bottom:1pt solid #c9a9ae; padding-bottom:2pt; margin:13pt 0 5pt;}
-    .cv-profile,li,.grades-line,.cv-inline-list{font-size:10.5pt;}
-    .cv-entry-head b{font-size:11pt;}
-    .dates{color:#5e5257; font-style:italic; font-size:9.5pt;}
-  `},
+  classic:{ label:"Classic", d:{
+    font:"Georgia", size:21, color:"1C2430", line:336,
+    nameSize:40, nameColor:"16324F", contactSize:19, contactColor:"4A5568",
+    secFont:"Arial", secSize:20, secColor:"16324F", secCaps:true, secSpacing:30, secBorder:{color:"16324F", sz:8},
+    headSize:22, datesSize:19, datesColor:"5A6474", datesItalic:true }},
+  modern:{ label:"Modern", d:{
+    font:"Calibri", size:21, color:"222C38", line:348,
+    nameSize:44, nameColor:"0E7490", contactSize:19, contactColor:"55606E",
+    secSize:22, secColor:"0E7490", secBorder:{color:"0E7490", sz:16},
+    headSize:22, headColor:"111A24", datesSize:19, datesColor:"55606E" }},
+  minimal:{ label:"Minimal", d:{
+    font:"Arial", size:21, color:"000000", line:336,
+    nameSize:36, nameColor:"000000", contactSize:20, contactColor:"000000",
+    secSize:23, secColor:"000000",
+    headSize:22, datesSize:20, datesColor:"000000" }},
+  sidebar:{ label:"Sidebar", layout:"sidebar", side:["skills","interests"], headerBg:"22384C", sideBg:"22384C", d:{
+    font:"Calibri", size:21, color:"222C38", line:348,
+    nameSize:44, nameColor:"FFFFFF", contactSize:19, contactColor:"C9D4E0",
+    secSize:21, secColor:"22384C", secCaps:true, secSpacing:20, secBorder:{color:"22384C", sz:8},
+    headSize:22, datesSize:19, datesColor:"55606E",
+    sideTheme:{ size:20, color:"E9EEF4", secColor:"FFFFFF", secBorder:{color:"8FA3B8", sz:8}, datesColor:"C9D4E0" } }},
+  banner:{ label:"Banner", layout:"banner", headerBg:"1D63B8", d:{
+    font:"Calibri", size:21, color:"222C38", line:348,
+    nameSize:48, nameColor:"FFFFFF", nameAlign:"center", contactSize:19, contactColor:"D7E5F7", contactAlign:"center",
+    secSize:23, secColor:"1D63B8", secBorder:{color:"1D63B8", sz:16},
+    headSize:22, datesSize:19, datesColor:"55606E" }},
+  elegant:{ label:"Elegant", d:{
+    font:"Palatino Linotype", size:21, color:"2A2326", line:348,
+    nameSize:42, nameColor:"6B1F2A", nameAlign:"center", contactSize:19, contactColor:"5E5257", contactAlign:"center",
+    secSize:21, secColor:"6B1F2A", secCaps:true, secSpacing:40, secBorder:{color:"C9A9AE", sz:8},
+    headSize:22, datesSize:19, datesColor:"5E5257", datesItalic:true }},
+  executive:{ label:"Executive", d:{
+    font:"Cambria", size:21, color:"26272A", line:336,
+    nameSize:42, nameColor:"1F2937", nameCaps:true, nameSpacing:50, contactSize:19, contactColor:"6B7280",
+    secSize:20, secColor:"374151", secCaps:true, secSpacing:30, secBorder:{color:"9CA3AF", sz:4},
+    headSize:22, datesSize:19, datesColor:"6B7280", datesItalic:true }},
+  cobalt:{ label:"Cobalt", layout:"banner", headerBg:"16408A", d:{
+    font:"Segoe UI", size:21, color:"1F2933", line:348,
+    nameSize:48, nameColor:"FFFFFF", contactSize:19, contactColor:"C7D6F5",
+    secSize:22, secColor:"16408A", secBorder:{color:"16408A", sz:12},
+    headSize:22, datesSize:19, datesColor:"5A6473" }},
+  slate:{ label:"Slate", layout:"sidebar", side:["skills","interests"], headerBg:"3B4A58", sideBg:"EEF1F4", d:{
+    font:"Calibri", size:21, color:"27313B", line:348,
+    nameSize:44, nameColor:"FFFFFF", contactSize:19, contactColor:"D3DCE4",
+    secSize:21, secColor:"3B4A58", secCaps:true, secSpacing:20, secBorder:{color:"3B4A58", sz:8},
+    headSize:22, datesSize:19, datesColor:"66717D",
+    sideTheme:{ size:20, color:"33404C", secColor:"3B4A58", secBorder:{color:"AEB9C4", sz:8}, datesColor:"6B7683" } }},
+  ivory:{ label:"Ivory", d:{
+    font:"Book Antiqua", size:21, color:"32302B", line:348,
+    nameSize:42, nameColor:"3E3A33", nameAlign:"center", contactSize:19, contactColor:"7A7264", contactAlign:"center",
+    secSize:20, secColor:"8A6D3B", secCaps:true, secSpacing:40, secBorder:{color:"C9B98F", sz:8},
+    headSize:22, datesSize:19, datesColor:"7A7264", datesItalic:true }},
+  contemporary:{ label:"Contemporary", d:{
+    font:"Trebuchet MS", size:21, color:"25313A", line:360,
+    nameSize:46, nameColor:"0F766E", contactSize:19, contactColor:"5C6B75",
+    secSize:22, secColor:"0F766E", secBorder:{color:"0F766E", sz:16},
+    headSize:22, headColor:"10202B", datesSize:19, datesColor:"5C6B75" }},
+  graphite:{ label:"Graphite", layout:"banner", headerBg:"2B2D31", d:{
+    font:"Segoe UI", size:21, color:"26282C", line:348,
+    nameSize:48, nameColor:"FFFFFF", contactSize:19, contactColor:"CBD2D9",
+    secSize:22, secColor:"B45309", secBorder:{color:"B45309", sz:12},
+    headSize:22, datesSize:19, datesColor:"5F6B76" }},
+  forest:{ label:"Forest", d:{
+    font:"Garamond", size:22, color:"27302A", line:340,
+    nameSize:44, nameColor:"1E5631", contactSize:19, contactColor:"5F6E64",
+    secSize:21, secColor:"1E5631", secCaps:true, secSpacing:30, secBorder:{color:"9CB8A6", sz:8},
+    headSize:23, datesSize:19, datesColor:"5F6E64", datesItalic:true }},
+  merlot:{ label:"Merlot", layout:"sidebar", side:["skills","interests"], headerBg:"4A1620", sideBg:"4A1620", d:{
+    font:"Calibri", size:21, color:"2B2226", line:348,
+    nameSize:44, nameColor:"FFFFFF", contactSize:19, contactColor:"E3C9CE",
+    secSize:21, secColor:"4A1620", secCaps:true, secSpacing:20, secBorder:{color:"4A1620", sz:8},
+    headSize:22, datesSize:19, datesColor:"6E5A60",
+    sideTheme:{ size:20, color:"F2E4E7", secColor:"FFFFFF", secBorder:{color:"B98790", sz:8}, datesColor:"E3C9CE" } }},
+  pearl:{ label:"Pearl", layout:"banner", headerBg:"EEF1F5", d:{
+    font:"Calibri", size:21, color:"2A323C", line:348,
+    nameSize:46, nameColor:"1F2A37", nameAlign:"center", contactSize:19, contactColor:"5B6B7C", contactAlign:"center",
+    secSize:21, secColor:"2C7A7B", secCaps:true, secSpacing:20, secBorder:{color:"2C7A7B", sz:8},
+    headSize:22, datesSize:19, datesColor:"5B6B7C" }},
+  onyx:{ label:"Onyx", d:{
+    font:"Arial", size:21, color:"111111", line:336,
+    nameSize:52, nameColor:"000000", nameCaps:true, nameSpacing:30, contactSize:19, contactColor:"444444",
+    secSize:22, secColor:"000000", secCaps:true, secSpacing:20, secBorder:{color:"000000", sz:24},
+    headSize:22, datesSize:19, datesColor:"444444" }},
+  sapphire:{ label:"Sapphire", d:{
+    font:"Constantia", size:21, color:"24303C", line:344,
+    nameSize:44, nameColor:"15467A", nameAlign:"center", contactSize:19, contactColor:"5A6B7C", contactAlign:"center",
+    secSize:21, secColor:"15467A", secCaps:true, secSpacing:30, secBorder:{color:"8FB3D9", sz:8},
+    headSize:22, datesSize:19, datesColor:"5A6B7C", datesItalic:true }},
+  regal:{ label:"Regal", d:{
+    font:"Cambria", size:21, color:"2B2733", line:344,
+    nameSize:44, nameColor:"4C1D95", contactSize:19, contactColor:"6B6478",
+    secSize:21, secColor:"4C1D95", secCaps:true, secSpacing:30, secBorder:{color:"B7A5E0", sz:8},
+    headSize:22, datesSize:19, datesColor:"6B6478", datesItalic:true }},
+  copper:{ label:"Copper", d:{
+    font:"Candara", size:21, color:"2E2A26", line:348,
+    nameSize:44, nameColor:"8C4A2F", contactSize:19, contactColor:"75655A",
+    secSize:22, secColor:"8C4A2F", secBorder:{color:"8C4A2F", sz:12},
+    headSize:22, headColor:"3A322B", datesSize:19, datesColor:"75655A" }},
+  blush:{ label:"Blush", d:{
+    font:"Palatino Linotype", size:21, color:"33272B", line:348,
+    nameSize:42, nameColor:"9D5C63", nameAlign:"center", contactSize:19, contactColor:"7D6A6E", contactAlign:"center",
+    secSize:20, secColor:"9D5C63", secCaps:true, secSpacing:40, secBorder:{color:"D9B3B8", sz:8},
+    headSize:22, datesSize:19, datesColor:"7D6A6E", datesItalic:true }},
+  sand:{ label:"Sand", d:{
+    font:"Tahoma", size:20, color:"3A3A33", line:344,
+    nameSize:40, nameColor:"6B705C", contactSize:19, contactColor:"7C7F70",
+    secSize:20, secColor:"6B705C", secCaps:true, secSpacing:30, secBorder:{color:"6B705C", sz:8},
+    headSize:21, datesSize:19, datesColor:"7C7F70" }},
+  steel:{ label:"Steel", layout:"banner", headerBg:"4B5563", d:{
+    font:"Segoe UI", size:21, color:"2A313A", line:348,
+    nameSize:46, nameColor:"FFFFFF", contactSize:19, contactColor:"D3D8DE",
+    secSize:21, secColor:"4B5563", secCaps:true, secSpacing:20, secBorder:{color:"9AA3AE", sz:8},
+    headSize:22, datesSize:19, datesColor:"6A7380" }},
+  midnight:{ label:"Midnight", layout:"banner", headerBg:"14213D", d:{
+    font:"Calibri", size:21, color:"232A36", line:348,
+    nameSize:48, nameColor:"FFFFFF", nameAlign:"center", contactSize:19, contactColor:"C9D2E3", contactAlign:"center",
+    secSize:22, secColor:"9A7B1C", secBorder:{color:"C9A227", sz:12},
+    headSize:22, datesSize:19, datesColor:"5C6470" }},
+  aqua:{ label:"Aqua", layout:"banner", headerBg:"DFF0EE", d:{
+    font:"Calibri", size:21, color:"24373C", line:348,
+    nameSize:46, nameColor:"0F5E59", nameAlign:"center", contactSize:19, contactColor:"4E6B6E", contactAlign:"center",
+    secSize:21, secColor:"0F5E59", secCaps:true, secSpacing:20, secBorder:{color:"0F5E59", sz:8},
+    headSize:22, datesSize:19, datesColor:"4E6B6E" }},
+  emerald:{ label:"Emerald", layout:"sidebar", side:["skills","interests"], headerBg:"1B4D3E", sideBg:"1B4D3E", d:{
+    font:"Calibri", size:21, color:"253B33", line:348,
+    nameSize:44, nameColor:"FFFFFF", contactSize:19, contactColor:"CDE5DC",
+    secSize:21, secColor:"1B4D3E", secCaps:true, secSpacing:20, secBorder:{color:"1B4D3E", sz:8},
+    headSize:22, datesSize:19, datesColor:"5F7268",
+    sideTheme:{ size:20, color:"E3F0EA", secColor:"FFFFFF", secBorder:{color:"8FB8A8", sz:8}, datesColor:"CDE5DC" } }},
+  carbon:{ label:"Carbon", layout:"sidebar", side:["skills","interests"], headerBg:"26282B", sideBg:"26282B", d:{
+    font:"Segoe UI", size:21, color:"26282B", line:348,
+    nameSize:44, nameColor:"FFFFFF", contactSize:19, contactColor:"CFCFCF",
+    secSize:21, secColor:"B45309", secCaps:true, secSpacing:20, secBorder:{color:"B45309", sz:8},
+    headSize:22, datesSize:19, datesColor:"66696E",
+    sideTheme:{ size:20, color:"E8E8E8", secColor:"FFFFFF", secBorder:{color:"77797D", sz:8}, datesColor:"CFCFCF" } }},
 };
+
+/* Minimal stored (uncompressed) ZIP writer — all a .docx package needs. */
+const CRC_TABLE = (()=>{ const t=[]; for(let n=0;n<256;n++){ let c=n; for(let k=0;k<8;k++) c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1); t[n]=c>>>0; } return t; })();
+function crc32(b){ let c=0xFFFFFFFF; for(let i=0;i<b.length;i++) c=CRC_TABLE[(c^b[i])&0xFF]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+function makeZip(files){ // files: [[name, xmlText], ...]
+  const enc=new TextEncoder(), chunks=[], central=[];
+  let off=0;
+  const now=new Date();
+  const dTime=(now.getHours()<<11)|(now.getMinutes()<<5)|(now.getSeconds()>>1);
+  const dDate=((now.getFullYear()-1980)<<9)|((now.getMonth()+1)<<5)|now.getDate();
+  const u16=n=>[n&255,(n>>>8)&255], u32=n=>[n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255];
+  files.forEach(([name,text])=>{
+    const nb=enc.encode(name), db=enc.encode(text), crc=crc32(db);
+    chunks.push(new Uint8Array([80,75,3,4,...u16(20),...u16(0),...u16(0),...u16(dTime),...u16(dDate),
+      ...u32(crc),...u32(db.length),...u32(db.length),...u16(nb.length),...u16(0)]), nb, db);
+    central.push([nb,crc,db.length,off]);
+    off+=30+nb.length+db.length;
+  });
+  let cdSize=0;
+  central.forEach(([nb,crc,len,o])=>{
+    chunks.push(new Uint8Array([80,75,1,2,...u16(20),...u16(20),...u16(0),...u16(0),...u16(dTime),...u16(dDate),
+      ...u32(crc),...u32(len),...u32(len),...u16(nb.length),...u16(0),...u16(0),...u16(0),...u16(0),...u32(0),...u32(o)]), nb);
+    cdSize+=46+nb.length;
+  });
+  chunks.push(new Uint8Array([80,75,5,6,...u16(0),...u16(0),...u16(files.length),...u16(files.length),...u32(cdSize),...u32(off),...u16(0)]));
+  return new Blob(chunks,{type:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
+}
+
+/* WordprocessingML builders */
+const xesc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+function dxRun(text,f){
+  let r="";
+  if(f.font) r+=`<w:rFonts w:ascii="${f.font}" w:hAnsi="${f.font}" w:cs="${f.font}"/>`;
+  if(f.bold) r+="<w:b/>";
+  if(f.italic) r+="<w:i/>";
+  if(f.caps) r+="<w:caps/>";
+  if(f.color) r+=`<w:color w:val="${f.color}"/>`;
+  if(f.spacing) r+=`<w:spacing w:val="${f.spacing}"/>`;
+  if(f.size) r+=`<w:sz w:val="${f.size}"/><w:szCs w:val="${f.size}"/>`;
+  if(f.underline) r+='<w:u w:val="single"/>';
+  return `<w:r>${r?`<w:rPr>${r}</w:rPr>`:""}<w:t xml:space="preserve">${xesc(text)}</w:t></w:r>`;
+}
+function dxPara(runs,p){
+  p=p||{};
+  let pr="";
+  if(p.border) pr+=`<w:pBdr><w:bottom w:val="single" w:sz="${p.border.sz}" w:space="2" w:color="${p.border.color}"/></w:pBdr>`;
+  if(p.before||p.after||p.line) pr+=`<w:spacing w:before="${p.before||0}" w:after="${p.after||0}"${p.line?` w:line="${p.line}" w:lineRule="${p.lineRule||"auto"}"`:""}/>`;
+  // Bullets are a literal "•" run + hanging indent, NOT Word numbering — the
+  // numbering glyph's colour is resolved inconsistently across viewers
+  // (black dots on dark sidebars); a text run always matches its runs.
+  if(p.bullet) pr+='<w:ind w:left="425" w:hanging="200"/>';
+  if(p.align) pr+=`<w:jc w:val="${p.align}"/>`;
+  return `<w:p>${pr?`<w:pPr>${pr}</w:pPr>`:""}${runs.join("")}</w:p>`;
+}
+function dxBase(t){ return {font:t.font,size:t.size,color:t.color}; }
+function dxInline(node,f,t){ // inline DOM → runs, tracking bold/italic/.dates
+  const out=[];
+  Array.from(node.childNodes).forEach(ch=>{
+    if(ch.nodeType===3){ if(ch.textContent) out.push(dxRun(ch.textContent,f)); return; }
+    if(ch.nodeType!==1 || ch.classList.contains("cv-empty")) return;
+    if(ch.tagName==="BR"){ out.push("<w:r><w:br/></w:r>"); return; }
+    const nf=Object.assign({},f);
+    if(ch.tagName==="B"||ch.tagName==="STRONG") nf.bold=true;
+    if(ch.tagName==="I"||ch.tagName==="EM") nf.italic=true;
+    if(ch.tagName==="U") nf.underline=true;
+    // Some browsers write style spans in contenteditable despite styleWithCSS.
+    const stl=(ch.getAttribute&&ch.getAttribute("style"))||"";
+    if(/font-weight\s*:\s*(bold|[6-9]00)/i.test(stl)) nf.bold=true;
+    if(/font-style\s*:\s*italic/i.test(stl)) nf.italic=true;
+    if(/text-decoration[^;]*underline/i.test(stl)) nf.underline=true;
+    if(ch.classList.contains("dates")) Object.assign(nf,{bold:false,italic:!!t.datesItalic,size:t.datesSize,color:t.datesColor});
+    out.push.apply(out,dxInline(ch,nf,t));
+  });
+  return out;
+}
+const DX_BLOCK=/^(DIV|P|UL|OL|H[1-6]|SECTION)$/;
+function dxBlocks(el,t,out){ // block DOM → paragraphs, keyed on our CV classes
+  Array.from(el.childNodes).forEach(n=>{
+    if(n.nodeType===3){
+      if(n.textContent.trim()) out.push(dxPara([dxRun(n.textContent.trim(),dxBase(t))],{after:40,line:t.line}));
+      return;
+    }
+    if(n.nodeType!==1) return;
+    const cl=n.classList, tag=n.tagName;
+    if(cl.contains("cv-empty")) return;
+    let runs;
+    if(cl.contains("cv-name")){
+      runs=dxInline(n,{font:t.font,bold:true,size:t.nameSize,color:t.nameColor,caps:!!t.nameCaps,spacing:t.nameSpacing},t);
+      if(runs.length) out.push(dxPara(runs,{after:40,align:t.nameAlign,line:t.line}));
+    } else if(cl.contains("cv-contact")){
+      // Form-built contact blocks are one row per field; manually edited/AI
+      // ones are still a single flat line — either way, each row becomes its
+      // own paragraph, with normal spacing only after the last one.
+      const rows = Array.from(n.children).filter(ch=>ch.nodeType===1 && ch.classList.contains("cv-contact-row"));
+      if(rows.length){
+        rows.forEach((row,i)=>{
+          const rr=dxInline(row,{font:t.font,size:t.contactSize,color:t.contactColor},t);
+          if(rr.length) out.push(dxPara(rr,{after:i===rows.length-1?160:20,align:t.contactAlign,line:t.line}));
+        });
+      } else {
+        runs=dxInline(n,{font:t.font,size:t.contactSize,color:t.contactColor},t);
+        if(runs.length) out.push(dxPara(runs,{after:160,align:t.contactAlign,line:t.line}));
+      }
+    } else if(tag==="H3"||cl.contains("cv-sec")){
+      runs=dxInline(n,{font:t.secFont||t.font,bold:true,caps:!!t.secCaps,spacing:t.secSpacing,size:t.secSize,color:t.secColor},t);
+      if(runs.length) out.push(dxPara(runs,{before:200,after:80,border:t.secBorder,line:t.line}));
+    } else if(tag==="UL"||tag==="OL"){
+      Array.from(n.children).forEach(li=>{
+        const lr=dxInline(li,dxBase(t),t);
+        if(lr.length) out.push(dxPara([dxRun("•  ",dxBase(t))].concat(lr),{bullet:true,after:20,line:t.line}));
+      });
+    } else if(cl.contains("cv-entry-head")){
+      runs=dxInline(n,{font:t.font,size:t.headSize||t.size,color:t.headColor||t.color},t);
+      if(runs.length) out.push(dxPara(runs,{before:40,after:20,line:t.line}));
+    } else if(DX_BLOCK.test(tag)&&Array.from(n.children).some(c=>DX_BLOCK.test(c.tagName))){
+      dxBlocks(n,t,out); // container (.cv-sec-block, .cv-entry, .cv-body…)
+    } else {
+      runs=dxInline(n,dxBase(t),t); // .cv-profile, .grades-line, plain divs
+      if(runs.length) out.push(dxPara(runs,{after:40,line:t.line}));
+    }
+  });
+}
+function dxCell(paras,w,fill,pad,span){ // Word can't do flex/grid — coloured layouts become table cells
+  // Widths in absolute twips ("dxa"), not pct — mobile viewers (iOS Quick
+  // Look etc.) ignore pct table widths and shrink-wrap the cells.
+  return `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>`+
+    (span?`<w:gridSpan w:val="${span}"/>`:"")+
+    (fill?`<w:shd w:val="clear" w:color="auto" w:fill="${fill}"/>`:"")+
+    `<w:tcMar><w:top w:w="${pad}" w:type="dxa"/><w:left w:w="${pad}" w:type="dxa"/><w:bottom w:w="${pad}" w:type="dxa"/><w:right w:w="${pad}" w:type="dxa"/></w:tcMar>`+
+    `<w:vAlign w:val="top"/></w:tcPr>${paras.length?paras.join(""):"<w:p/>"}</w:tc>`;
+}
+function dxTable(gridCols,rows){ // rows: arrays of dxCell strings, or {cells, minH} for a minimum row height
+  const total=gridCols.reduce((a,b)=>a+b,0);
+  return `<w:tbl><w:tblPr><w:tblW w:w="${total}" w:type="dxa"/><w:tblLayout w:type="fixed"/></w:tblPr>`+
+    `<w:tblGrid>${gridCols.map(w=>`<w:gridCol w:w="${w}"/>`).join("")}</w:tblGrid>`+
+    rows.map(r=>{
+      const cells=Array.isArray(r)?r:r.cells;
+      const pr=(!Array.isArray(r)&&r.minH)?`<w:trPr><w:trHeight w:val="${r.minH}" w:hRule="${r.hRule||"atLeast"}"/></w:trPr>`:"";
+      return `<w:tr>${pr}${cells.join("")}</w:tr>`;
+    }).join("")+`</w:tbl>`;
+}
 /* The preview (and therefore the printed PDF) wears the selected template so
    you see exactly what you'll download. Classic is the base .a4 style. */
 function applyTemplate(){
-  const key = WORD_TEMPLATES[v("f_wordtpl")] ? v("f_wordtpl") : "classic";
+  if(editMode){ setFlash("Save or discard your preview edits first", true); $("f_wordtpl").value = curTplKey; drawTplGrid(); return; }
+  const key = WORD_TEMPLATES[v("f_wordtpl")] ? v("f_wordtpl") : "modern";
+  curTplKey = key;
   $("cv").className = "a4" + (key === "classic" ? "" : " tpl-" + key);
   renderPreview(); // structural templates change the DOM arrangement too
+  drawTplGrid();   // keep the visual picker's highlight in sync
 }
 function exportWord(){
-  const tpl = WORD_TEMPLATES[v("f_wordtpl")] || WORD_TEMPLATES.classic;
+  const tpl = WORD_TEMPLATES[v("f_wordtpl")] || WORD_TEMPLATES.modern;
+  const t = tpl.d;
   // #cv holds whichever version (form or AI) is currently shown — export that.
   const tmp=document.createElement("div"); tmp.innerHTML=$("cv").innerHTML;
   const c=tmp.querySelector(".cv-contact");
   if(c){
-    const parts = (viewMode === "ai" && aiCVHtml)
-      ? Array.from(c.querySelectorAll("span")).map(s=>s.textContent.trim())
-      : [v("f_city"),v("f_email"),v("f_phone"),v("f_links")];
-    c.textContent = parts.filter(Boolean).join("   ·   ");
+    // Manually edited previews (and the AI version) keep whatever contact line
+    // is on screen, flattened to one line; the plain form version rebuilds its
+    // one-row-per-field layout straight from the form fields.
+    const manual = (viewMode === "ai" && aiCVHtml) || editMode || !!editedHtml[viewMode];
+    if(manual){
+      const spans = Array.from(c.querySelectorAll("span:not(.csep)")).map(s=>s.textContent.trim()).filter(Boolean);
+      const parts = spans.length ? spans : [c.textContent.trim()];
+      c.textContent = parts.filter(Boolean).join("   ·   ");
+    } else {
+      const rows = [
+        v("f_dob") && `DOB: ${formatDob(v("f_dob"))}`,
+        v("f_address") && `Address: ${v("f_address")}`,
+        v("f_email") && `Email Id: ${v("f_email")}`,
+        v("f_phone") && `Phone: ${v("f_phone")}`,
+        v("f_links")
+      ].filter(Boolean);
+      c.innerHTML = rows.map(row=>`<div class="cv-contact-row">${esc(row)}</div>`).join("");
+    }
   }
   tmp.querySelectorAll(".cv-entry-head .dates").forEach(d=>{ d.textContent="   ("+d.textContent+")"; });
-  // Word can't render flex/grid — convert structural layouts to tables.
-  const wHeader = tmp.querySelector(".cv-header");
-  if(wHeader && tpl.headerBg){
-    const ht=document.createElement("table");
-    ht.setAttribute("width","100%"); ht.setAttribute("cellpadding","14"); ht.setAttribute("cellspacing","0");
-    ht.innerHTML = `<tr><td class="cv-header-td" bgcolor="${tpl.headerBg}">${wHeader.innerHTML}</td></tr>`;
-    wHeader.replaceWith(ht);
+
+  // A4 content width is 9412 twips (11906 − 2×1247 margins).
+  const body=[];
+  const headerEl=tmp.querySelector(".cv-header");
+  const cols=tmp.querySelector(".cv-cols");
+  const hp=[];
+  if(headerEl){ dxBlocks(headerEl,t,hp); headerEl.remove(); }
+  if(cols){
+    const st=Object.assign({},t,t.sideTheme||{});
+    const sp=[],mp=[];
+    const sideEl=cols.querySelector(".cv-side"), mainEl=cols.querySelector(".cv-main");
+    if(sideEl) dxBlocks(sideEl,st,sp);
+    if(mainEl) dxBlocks(mainEl,t,mp);
+    // ONE table: banner row spanning both columns, then side/main row.
+    // Full-bleed like real Word résumé templates: the section has ZERO page
+    // margins and the table runs edge-to-edge across the paper (11906 twips);
+    // generous cell margins provide all the breathing room instead.
+    // Pagination: Word renders the header row at its NATURAL height (trHeight
+    // "exact" proved unreliable), which lands anywhere from ~2200 to ~3400
+    // twips depending on name size and contact wrapping. If the columns row's
+    // minimum doesn't fit in what remains of the page, Word pushes the WHOLE
+    // row to page 2, blanking page 1 — so budget for the worst case:
+    // 3400 header + 13000 columns + 14 closer = 16414 of A4's 16838. The
+    // panel reaches within ~1cm of the page bottom; that thin white strip is
+    // the price of never losing page 1.
+    const rows=[];
+    if(hp.length) rows.push([dxCell(hp,11906,tpl.headerBg,480,2)]);
+    rows.push({cells:[dxCell(sp,3215,tpl.sideBg,400),dxCell(mp,8691,null,500)], minH:hp.length?13000:16000});
+    body.push(dxTable([3215,8691],rows));
+    body.push(dxPara([],{line:14,lineRule:"exact"})); // tiny closer — a table may not end the body, but a full line would spill to page 2
+  } else {
+    if(hp.length){
+      if(tpl.headerBg){
+        body.push(dxTable([9412],[[dxCell(hp,9412,tpl.headerBg,220)]]));
+        // controlled gap under the banner: 1pt line + 11pt after
+        body.push(dxPara([],{after:220,line:20,lineRule:"exact"}));
+      } else body.push.apply(body,hp);
+    }
+    dxBlocks(tmp,t,body);
   }
-  const wCols = tmp.querySelector(".cv-cols");
-  if(wCols){
-    const side=wCols.querySelector(".cv-side"), main=wCols.querySelector(".cv-main");
-    const t=document.createElement("table");
-    t.setAttribute("width","100%"); t.setAttribute("cellpadding","10"); t.setAttribute("cellspacing","0");
-    t.innerHTML = `<tr><td width="30%" valign="top" class="cv-side-td" bgcolor="${tpl.sideBg||"#2c4258"}">${side?side.innerHTML:""}</td>` +
-                  `<td valign="top" class="cv-main-td">${main?main.innerHTML:""}</td></tr>`;
-    wCols.replaceWith(t);
-  }
-  const head=`<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>CV</title>
-<style>${WORD_BASE_CSS}${tpl.css}</style></head><body>`;
-  const blob=new Blob(["﻿", head+tmp.innerHTML+"</body></html>"], {type:"application/msword"});
-  downloadBlob(blob, fileBase()+".doc");
-  setFlash(`Word file downloaded ✓ (${tpl.label} template) — opens in Microsoft Word / Google Docs`);
+
+  const W='xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"';
+  const XML='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+  // Sidebar layouts are full-bleed (the table IS the page); everything else
+  // gets standard 2cm / 2.2cm margins.
+  const pgMar = cols
+    ? '<w:pgMar w:top="0" w:right="0" w:bottom="0" w:left="0" w:header="0" w:footer="0" w:gutter="0"/>'
+    : '<w:pgMar w:top="1134" w:right="1247" w:bottom="1134" w:left="1247" w:header="708" w:footer="708" w:gutter="0"/>';
+  const files=[
+    ["[Content_Types].xml", XML+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'+
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'+
+      '<Default Extension="xml" ContentType="application/xml"/>'+
+      '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'+
+      '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>'+
+      '<Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/></Types>'],
+    ["_rels/.rels", XML+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>'],
+    ["word/document.xml", XML+`<w:document ${W}><w:body>${body.join("")}`+
+      `<w:sectPr><w:pgSz w:w="11906" w:h="16838"/>${pgMar}</w:sectPr></w:body></w:document>`], // A4
+    // compatibilityMode 15 = "made for modern Word" — without it, Word opens
+    // the file in [Compatibility Mode] and lays tables out with legacy rules.
+    ["word/settings.xml", XML+`<w:settings ${W}><w:compat>`+
+      '<w:compatSetting w:name="compatibilityMode" w:uri="http://schemas.microsoft.com/office/word" w:val="15"/>'+
+      '</w:compat></w:settings>'],
+    ["word/styles.xml", XML+`<w:styles ${W}><w:docDefaults><w:rPrDefault><w:rPr>`+
+      `<w:rFonts w:ascii="${t.font}" w:hAnsi="${t.font}" w:cs="${t.font}"/><w:color w:val="${t.color}"/><w:sz w:val="${t.size}"/><w:szCs w:val="${t.size}"/>`+
+      `</w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="0" w:line="${t.line}" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults></w:styles>`],
+    ["word/_rels/document.xml.rels", XML+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'+
+      '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/></Relationships>'],
+  ];
+  downloadBlob(makeZip(files), fileBase()+".docx");
+  setFlash(`Word file downloaded ✓ (${tpl.label} template) — a real .docx that opens in Word, Google Docs, LibreOffice and more`);
 }
 
 /* PowerPoint export removed by request — PDF and Word are the formats recruiters accept. */
@@ -1077,6 +2430,17 @@ function exportWord(){
 /* ================= AI generation (server-backed) ================= */
 let licenseKey = "";      // kept in memory only — never localStorage/cookies
 let lastAIResult = "";
+const FETCH_TIMEOUT_MS = 60000;
+const GENERATE_TIMEOUT_MS = 120000;
+/* Every server call goes through this so nothing can hang forever — an abort
+   surfaces as a distinct "took too long" message rather than a generic network error. */
+async function fetchTimeout(url, opts, ms){
+  const ctrl = new AbortController();
+  const timer = setTimeout(()=>ctrl.abort(), ms || FETCH_TIMEOUT_MS);
+  try{ return await fetch(url, {...(opts||{}), signal: ctrl.signal}); }
+  finally{ clearTimeout(timer); }
+}
+function isAbort(err){ return err && err.name === "AbortError"; }
 
 function showAIMessage(msg, isErr){
   $("aiPanel").style.display="block";
@@ -1093,6 +2457,7 @@ function showAIResult(text){
   const out=$("aiOutput"); out.textContent=text; out.style.display="block";
   $("aiActions").style.display="flex";
   renderNextActions(text);
+  scheduleSave();
   $("aiPanel").scrollIntoView({behavior:"smooth", block:"nearest"});
 }
 /* Pull the "### Three actions…" bullets out of the AI feedback and show them
@@ -1119,24 +2484,28 @@ function renderNextActions(md){
     if(t){ tag=t[1]; rest=rest.slice(t[0].length); }
     return `<li>${title?`<b>${esc(title)}</b> `:""}${tag?`<span class="act-tag">${esc(tag)}</span> `:""}${esc(rest)}</li>`;
   }).join("");
-  const targetText = $("f_target").options[$("f_target").selectedIndex].text;
   p.innerHTML = `<h2>🎯 Three actions for the next six months to create public evidence</h2>
-    <p class="hint" style="margin-bottom:0">Tailored to your target: ${esc(targetText)}.</p>
+    <p class="hint" style="margin-bottom:0">Tailored to your target: ${esc(targetText())}.</p>
     <ul class="act-list">${items}</ul>`;
   p.style.display="block";
 }
-function showUpgrade(checkoutUrl, msg){
+let upgradeRetry = null; // the blocked action "Use key" should resume, once a key is accepted
+function showUpgrade(checkoutUrl, msg, retryFn){
   $("aiPanel").style.display="none";
   const p=$("upgradePanel"); p.style.display="block";
-  if(checkoutUrl) $("subscribeLink").href=checkoutUrl;
+  // Only ever point the link at an https:// URL the server gave us — never let an
+  // unexpected response value (or its absence) turn this into a javascript: link.
+  if(checkoutUrl && /^https:\/\//i.test(checkoutUrl)) $("subscribeLink").href=checkoutUrl;
+  else $("subscribeLink").removeAttribute("href");
   $("upgradeMsg").textContent = msg||"";
+  upgradeRetry = retryFn || generateAI;
   p.scrollIntoView({behavior:"smooth", block:"nearest"});
 }
 function useLicenseKey(){
   licenseKey = v("f_licensekey");
   if(!licenseKey){ $("upgradeMsg").textContent="Paste your licence key first."; return; }
   $("upgradeMsg").textContent="";
-  generateAI();
+  (upgradeRetry || generateAI)();
 }
 async function generateAI(){
   const btn=$("btnAI");
@@ -1148,17 +2517,17 @@ async function generateAI(){
     const headers={ "Content-Type":"application/json" };
     if(licenseKey) headers["X-License-Key"]=licenseKey;
     try{
-      resp = await fetch("/api/generate-cv", {
+      resp = await fetchTimeout("/api/generate-cv", {
         method:"POST", headers,
         body: JSON.stringify({ facts: buildPrompt() })
-      });
+      }, GENERATE_TIMEOUT_MS);
     }catch(networkErr){
-      showAIMessage("Couldn't reach the CV Builder server. If you opened this page as a plain file, run the server (npm start) and open http://localhost:3000 instead. PDF, Word and Copy-prompt all still work offline.", true);
+      showAIMessage(isAbort(networkErr) ? "This is taking too long — please try again." : "Couldn't reach the server. Check your internet connection and try again — your CV is saved in this browser.", true);
       return;
     }
     const data = await resp.json().catch(()=>({}));
     if(resp.status===402){
-      showUpgrade(data.checkoutUrl, licenseKey ? (data.error||"That licence key was not accepted.") : "");
+      showUpgrade(data.checkoutUrl, licenseKey ? (data.error||"That licence key was not accepted.") : "", generateAI);
       return;
     }
     if(resp.status===429){ showAIMessage(data.error||"Rate limit reached — please try again in an hour.", true); return; }
@@ -1181,8 +2550,9 @@ async function suggestAI(){
   btn.textContent="⏳ Thinking…";
   const c = step3Copy();
   const context = [
-    "Target role: " + $("f_target").options[$("f_target").selectedIndex].text,
-    "A Levels: " + (S.alevels.filter(a=>a.subj).map(a=>a.subj).join(", ") || "none listed"),
+    "Target role: " + targetText(),
+    stageFactsLine(),
+    "Qualifications: " + qualificationsFactsLine(),
     "Projects so far: " + (S.projects.filter(p=>p.title||p.desc).map(p=>p.title+" — "+p.desc).join("; ") || "none"),
     c.quantLabel + ": " + (v("f_quant") || "none"),
     "Skills so far: " + (v("f_skills") || "none"),
@@ -1193,14 +2563,16 @@ async function suggestAI(){
     const headers={ "Content-Type":"application/json" };
     if(licenseKey) headers["X-License-Key"]=licenseKey;
     try{
-      resp = await fetch("/api/suggest", { method:"POST", headers, body: JSON.stringify({ context }) });
+      resp = await fetchTimeout("/api/suggest", { method:"POST", headers, body: JSON.stringify({ context }) });
     }catch(networkErr){
-      showSuggestions('<span class="sp-err">Couldn\'t reach the CV Builder server. If you opened this page as a plain file, run the server (npm start) and open http://localhost:3000 instead.</span>');
+      showSuggestions(isAbort(networkErr)
+        ? '<span class="sp-err">This is taking too long — please try again.</span>'
+        : '<span class="sp-err">Couldn\'t reach the server. Check your internet connection and try again — your CV is saved in this browser.</span>');
       return;
     }
     const data = await resp.json().catch(()=>({}));
     if(resp.status===402){
-      showUpgrade(data.checkoutUrl, licenseKey ? (data.error||"That licence key was not accepted.") : "");
+      showUpgrade(data.checkoutUrl, licenseKey ? (data.error||"That licence key was not accepted.") : "", suggestAI);
       return;
     }
     if(!resp.ok){
@@ -1221,6 +2593,131 @@ async function suggestAI(){
   }
 }
 
+/* ---------- step 1: tailor to a job advert ---------- */
+function setTailorMsg(msg, isErr){
+  const el=$("tailorMsg"); el.textContent=msg; el.classList.toggle("err", !!isErr);
+}
+async function fetchJobAd(){
+  const url = v("f_joburl");
+  if(!url){ setTailorMsg("Paste the job advert's link first — or paste the advert text straight into the box below.", true); return; }
+  const btn=$("btnFetchJob");
+  btn.disabled=true;
+  const orig=btn.textContent;
+  btn.textContent="⏳ Fetching…";
+  try{
+    let resp;
+    try{
+      resp = await fetchTimeout("/api/fetch-job", {
+        method:"POST", headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ url })
+      });
+    }catch(networkErr){
+      setTailorMsg(isAbort(networkErr) ? "This is taking too long — please try again." : "Couldn't reach the server. Check your internet connection and try again — your CV is saved in this browser.", true);
+      return;
+    }
+    const data = await resp.json().catch(()=>({}));
+    if(!resp.ok){ setTailorMsg(data.error||"Couldn't fetch that link — paste the job description in instead.", true); return; }
+    $("f_jobdesc").value = data.text||"";
+    scheduleSave();
+    setTailorMsg("Fetched ✓ — check the box below actually shows the job advert (some sites send a login page instead), trim anything irrelevant, then hit ✨ Tailor.");
+  } finally {
+    btn.disabled=false;
+    btn.textContent=orig;
+  }
+}
+/* The true facts the tailor is allowed to work with — everything typed so
+   far. The advert itself must never become a source of facts. */
+function tailorFacts(){
+  return [
+    "Target role: " + targetText(),
+    "Current profile summary: " + (v("f_profile") || "none yet"),
+    stageFactsLine(),
+    // qualificationsFactsLine() already folds the f_gcse summary (or
+    // individual GCSE rows) in — no separate "GCSEs:" line here any more,
+    // see that function's own comment for why.
+    "Qualifications: " + qualificationsFactsLine(),
+    "Projects: " + (S.projects.filter(p=>p.title||p.desc).map(p=>p.title+" — "+p.desc+(p.tools?" [Tools: "+p.tools+"]":"")).join("; ") || "none"),
+    "Maths/quant evidence: " + (v("f_quant") || "none"),
+    "Skills: " + (v("f_skills") || "none"),
+    "Work experience: " + (S.jobs.filter(j=>j.role||j.org).map(j=>j.role+" at "+j.org+(j.desc?" — "+j.desc:"")).join("; ") || "none"),
+    "Positions of responsibility: " + (v("f_responsibility") || "none"),
+    "Sport/fitness: " + ([v("f_football"),v("f_fitness")].filter(Boolean).join("; ") || "none"),
+    "Awards: " + (v("f_awards") || "none"),
+    "Interests: " + (v("f_interests") || "none")
+  ].join("\n");
+}
+async function tailorAI(){
+  const job = v("f_jobdesc");
+  if(!job){
+    setTailorMsg(v("f_joburl") ? "Fetch the advert first (or paste it into the box), then tailor." : "Paste the job description (or fetch it from a link) first.", true);
+    return;
+  }
+  const btn=$("btnTailor");
+  btn.disabled=true;
+  const orig=btn.textContent;
+  btn.textContent="⏳ Tailoring…";
+  try{
+    let resp;
+    const headers={ "Content-Type":"application/json" };
+    if(licenseKey) headers["X-License-Key"]=licenseKey;
+    try{
+      resp = await fetchTimeout("/api/tailor", {
+        method:"POST", headers,
+        body: JSON.stringify({ job: job.slice(0,12000), facts: tailorFacts() })
+      });
+    }catch(networkErr){
+      setTailorMsg(isAbort(networkErr) ? "This is taking too long — please try again." : "Couldn't reach the server. Check your internet connection and try again — your CV is saved in this browser.", true);
+      return;
+    }
+    const data = await resp.json().catch(()=>({}));
+    if(resp.status===402){
+      showUpgrade(data.checkoutUrl, licenseKey ? (data.error||"That licence key was not accepted.") : "", tailorAI);
+      return;
+    }
+    if(!resp.ok){ setTailorMsg(data.error||"Tailoring failed — please try again in a moment.", true); return; }
+    if(data.beta) $("betaBadge").classList.add("show");
+    applyTailor(data.result||"");
+  } finally {
+    btn.disabled=false;
+    btn.textContent=orig;
+  }
+}
+function applyTailor(raw){
+  let obj=null;
+  try{ obj = JSON.parse(raw.replace(/^\s*```(?:json)?\s*|\s*```\s*$/g,"").trim()); }catch(e){}
+  if(!obj){
+    const m = raw.match(/\{[\s\S]*\}/);
+    if(m){ try{ obj = JSON.parse(m[0]); }catch(e){} }
+  }
+  if(!obj){ setTailorMsg("Tailoring came back unreadable — please try again in a moment.", true); return; }
+  const applied=[];
+  if(typeof obj.summary === "string" && obj.summary.trim()){
+    // Setting the box directly counts as "customised" — syncProfileDefault
+    // sees it differs from lastAutoProfile and leaves it alone from now on.
+    $("f_profile").value = obj.summary.trim();
+    applied.push("profile summary");
+  }
+  if(typeof obj.skills === "string" && obj.skills.trim() && v("f_skills")){
+    $("f_skills").value = obj.skills.trim();
+    applied.push("skills order");
+  }
+  const li = s=>`<li>${esc(s)}</li>`;
+  const matched = Array.isArray(obj.matched) ? obj.matched.filter(s=>typeof s==="string"&&s.trim()) : [];
+  const missing = Array.isArray(obj.missing) ? obj.missing.filter(s=>typeof s==="string"&&s.trim()) : [];
+  const p=$("tailorPanel");
+  if(matched.length || missing.length){
+    p.innerHTML =
+      (matched.length ? `<div class="sp-title">✅ Advert requirements your CV already evidences</div><ul>${matched.map(li).join("")}</ul>` : "") +
+      (missing.length ? `<div class="sp-title">⚠ Honest gaps — asked for in the advert, no evidence yet (mention transferable strengths in your cover letter; never add these to the CV)</div><ul>${missing.map(li).join("")}</ul>` : "");
+    p.classList.add("show");
+  } else p.classList.remove("show");
+  render();
+  scheduleSave();
+  setTailorMsg(applied.length
+    ? "Tailored ✓ — updated your "+applied.join(" and ")+" for this advert; both stay fully editable. ✨ Generate with AI will now tailor the whole CV too."
+    : "No changes applied — add your details (especially skills) first, then tailor again.");
+}
+
 /* ---------- step 1: import an existing CV and autofill ---------- */
 function setImportMsg(msg, isErr){
   const el=$("importMsg"); el.textContent=msg; el.classList.toggle("err", !!isErr);
@@ -1238,31 +2735,36 @@ async function importCV(){
     if(licenseKey) headers["X-License-Key"]=licenseKey;
     const fd=new FormData(); fd.append("file", f);
     try{
-      resp = await fetch("/api/import-cv", { method:"POST", headers, body: fd });
+      resp = await fetchTimeout("/api/import-cv", { method:"POST", headers, body: fd });
     }catch(networkErr){
-      setImportMsg("Couldn't reach the CV Builder server. If you opened this page as a plain file, run the server (npm start) and open http://localhost:3000 instead.", true);
+      setImportMsg(isAbort(networkErr) ? "This is taking too long — please try again." : "Couldn't reach the server. Check your internet connection and try again — your CV is saved in this browser.", true);
       return;
     }
     const data = await resp.json().catch(()=>({}));
     if(resp.status===402){
-      showUpgrade(data.checkoutUrl, licenseKey ? (data.error||"That licence key was not accepted.") : "");
+      showUpgrade(data.checkoutUrl, licenseKey ? (data.error||"That licence key was not accepted.") : "", importCV);
       return;
     }
     if(!resp.ok){ setImportMsg(data.error||"Import failed — please try again in a moment.", true); return; }
     if(data.beta) $("betaBadge").classList.add("show");
-    applyImport(data.result||"");
+    applyImport(data.result||"", data.ai !== false, !!data.upgrade);
   } finally {
     btn.disabled=false;
     btn.textContent=orig;
   }
 }
-function applyImport(raw){
+function applyImport(raw, usedAI=true, upgradeAvailable=false){
   let obj=null;
   try{ obj = JSON.parse(raw.replace(/^\s*```(?:json)?\s*|\s*```\s*$/g,"").trim()); }catch(e){}
+  if(!obj){
+    // The model sometimes wraps the JSON in prose — take the outermost {...}.
+    const m = raw.match(/\{[\s\S]*\}/);
+    if(m){ try{ obj = JSON.parse(m[0]); }catch(e){} }
+  }
   if(!obj){ setImportMsg("Couldn't read a CV out of that file — try a text-based PDF or DOCX (not a scan/photo).", true); return; }
   // Fill only what's empty — anything already typed is never overwritten.
   const setIfEmpty=(id,val)=>{ if(val && typeof val==="string" && !v(id)) $(id).value=val.trim(); };
-  setIfEmpty("f_name",obj.name); setIfEmpty("f_city",obj.city);
+  setIfEmpty("f_name",obj.name);
   setIfEmpty("f_email",obj.email); setIfEmpty("f_phone",obj.phone);
   setIfEmpty("f_links",obj.links); setIfEmpty("f_school",obj.school);
   setIfEmpty("f_schooldates",obj.schooldates); setIfEmpty("f_gcse",obj.gcse);
@@ -1270,9 +2772,9 @@ function applyImport(raw){
   setIfEmpty("f_responsibility",obj.responsibility); setIfEmpty("f_football",obj.sport);
   setIfEmpty("f_fitness",obj.fitness); setIfEmpty("f_awards",obj.awards);
   setIfEmpty("f_interests",obj.interests);
-  if(Array.isArray(obj.alevels) && obj.alevels.some(a=>a&&a.subj) && !S.alevels.some(a=>a.subj)){
-    S.alevels = obj.alevels.filter(a=>a&&a.subj).map(a=>({subj:a.subj||"",grade:a.grade||""}));
-    drawALevels();
+  if(!S.qualifications.some(q=>q.subject)){
+    const migrated = migrateQualifications(obj);
+    if(migrated.length){ S.qualifications = migrated; drawQualifications(); }
   }
   if(Array.isArray(obj.projects) && obj.projects.some(p=>p&&(p.title||p.desc)) && !S.projects.some(p=>p.title||p.desc)){
     S.projects = obj.projects.filter(p=>p&&(p.title||p.desc))
@@ -1285,7 +2787,11 @@ function applyImport(raw){
     drawJobs();
   }
   render();
-  setImportMsg("Imported ✓ — check every field and step; anything you'd already typed was left unchanged.");
+  setImportMsg(usedAI
+    ? "Imported with Claude AI ✓ — check every field and step; anything you'd already typed was left unchanged."
+    : upgradeAvailable
+    ? "Free import done ✓ — your contact details were filled from the file. Fill in the rest by hand, or get the AI upgrade (£4.99/month) and Claude will read the whole CV and fill every step."
+    : "Imported contact details without AI (no API key on the server) — fill in the rest by hand, or configure ANTHROPIC_API_KEY for full AI import.");
 }
 
 /* ---------- steps 3-5: category + rough text → AI writes the entry in ---------- */
@@ -1308,19 +2814,19 @@ async function polishAI(step){
     let resp;
     const headers={ "Content-Type":"application/json" };
     if(licenseKey) headers["X-License-Key"]=licenseKey;
-    const target=$("f_target").options[$("f_target").selectedIndex].text;
+    const target=targetText();
     try{
-      resp = await fetch("/api/polish", {
+      resp = await fetchTimeout("/api/polish", {
         method:"POST", headers,
         body: JSON.stringify({ category: cat, text, target })
       });
     }catch(networkErr){
-      setFillMsg(step, "Couldn't reach the CV Builder server. If you opened this page as a plain file, run the server (npm start) and open http://localhost:3000 instead.", true);
+      setFillMsg(step, isAbort(networkErr) ? "This is taking too long — please try again." : "Couldn't reach the server. Check your internet connection and try again — your CV is saved in this browser.", true);
       return;
     }
     const data = await resp.json().catch(()=>({}));
     if(resp.status===402){
-      showUpgrade(data.checkoutUrl, licenseKey ? (data.error||"That licence key was not accepted.") : "");
+      showUpgrade(data.checkoutUrl, licenseKey ? (data.error||"That licence key was not accepted.") : "", ()=>polishAI(step));
       return;
     }
     if(!resp.ok){
@@ -1419,15 +2925,23 @@ function parseAICV(md){
     if(/^[-*•]\s+/.test(line)){
       if(!secHtml){ secSlug="other"; secHtml=""; }
       if(!listOpen){ secHtml += "<ul>"; listOpen = true; }
-      secHtml += `<li>${mdInline(line.replace(/^[-*•]\s+/,""))}</li>`;
+      let item = line.replace(/^[-*•]\s+/,"");
+      if(secSlug === "skills") item = item.charAt(0).toUpperCase()+item.slice(1);
+      secHtml += `<li>${mdInline(item)}</li>`;
       continue;
     }
     closeList();
     if(nameDone && !contactDone){
       // first plain line after the name is the contact line ("a | b | c")
       const parts = line.split(/\s*[|·]\s*/).filter(Boolean);
-      headerHtml += `<div class="cv-contact">${parts.map(p=>`<span>${mdInline(p)}</span>`).join("")}</div>`;
+      headerHtml += `<div class="cv-contact">${parts.map(p=>`<span>${mdInline(p)}</span>`).join('<span class="csep"> · </span>')}</div>`;
       contactDone = true; continue;
+    }
+    if(secSlug === "skills" && secHtml){
+      // The model sometimes returns skills as one comma-run line — bullet it
+      // the same way the form version does.
+      secHtml += `<ul>${skillList(line).map(s=>`<li>${mdInline(s)}</li>`).join("")}</ul>`;
+      continue;
     }
     if(!secHtml){ secSlug = "profile"; }
     secHtml += `<p class="cv-profile">${mdInline(line)}</p>`;
@@ -1437,7 +2951,9 @@ function parseAICV(md){
 }
 function useAIVersion(){
   if(!lastAIResult) return;
+  if(editMode){ setFlash("Save or discard your preview edits first", true); return; }
   aiCVHtml = parseAICV(lastAIResult);
+  editedHtml.ai = ""; // fresh AI output replaces any edits made to the previous one
   viewMode = "ai";
   renderPreview();
   setFlash("AI version shown in the preview ✓ — PDF and Word now export this version");
@@ -1450,17 +2966,419 @@ function downloadAIResult(){
   setFlash("Text file downloaded ✓");
 }
 
+/* ---------- step 1: CV health check (ATS score) ---------- */
+function setDiagnoseMsg(msg, isErr){
+  const el=$("diagnoseMsg"); el.textContent=msg; el.classList.toggle("err", !!isErr);
+}
+async function diagnoseAI(){
+  const btn=$("btnDiagnose");
+  btn.disabled=true;
+  const orig=btn.textContent;
+  btn.textContent="⏳ Checking…";
+  try{
+    // Score the chosen file if there is one; otherwise the CV built so far.
+    let text="";
+    const f=$("f_cvfile").files[0];
+    if(f){
+      const fd=new FormData(); fd.append("file", f);
+      let ex;
+      try{ ex = await fetchTimeout("/api/extract-text", { method:"POST", body: fd }); }
+      catch(networkErr){ setDiagnoseMsg(isAbort(networkErr) ? "This is taking too long — please try again." : "Couldn't reach the server. Check your internet connection and try again — your CV is saved in this browser.", true); return; }
+      const exData = await ex.json().catch(()=>({}));
+      if(!ex.ok){ setDiagnoseMsg(exData.error||"Couldn't read that file.", true); return; }
+      text = exData.text||"";
+    } else {
+      text = $("cv").innerText||"";
+    }
+    if(text.trim().length < 80){
+      setDiagnoseMsg("Not enough CV to check yet — choose a file above, or fill in a few steps first.", true);
+      return;
+    }
+    let resp;
+    const headers={ "Content-Type":"application/json" };
+    if(licenseKey) headers["X-License-Key"]=licenseKey;
+    try{
+      resp = await fetchTimeout("/api/diagnose", { method:"POST", headers, body: JSON.stringify({ text: text.slice(0,20000) }) });
+    }catch(networkErr){
+      setDiagnoseMsg(isAbort(networkErr) ? "This is taking too long — please try again." : "Couldn't reach the server. Check your internet connection and try again — your CV is saved in this browser.", true);
+      return;
+    }
+    const data = await resp.json().catch(()=>({}));
+    if(!resp.ok){ setDiagnoseMsg(data.error||"CV check failed — please try again in a moment.", true); return; }
+    if(data.beta) $("betaBadge").classList.add("show");
+    renderDiagnosis(data);
+    setDiagnoseMsg("");
+  } finally {
+    btn.disabled=false;
+    btn.textContent=orig;
+  }
+}
+function renderDiagnosis(data){
+  const r=data.result||{};
+  const score=Math.max(0, Math.min(100, +r.score||0));
+  const cls = score>=80 ? "score-green" : score>=50 ? "score-amber" : "score-red";
+  const flags=(Array.isArray(r.flags)?r.flags:[]).map(f=>
+    `<li><span class="sev sev-${esc(f.severity==="high"||f.severity==="low"?f.severity:"medium")}">${esc((f.severity||"medium").toUpperCase())}</span>` +
+    `<b>${esc(f.section||"")}</b> — ${esc(f.problem||"")}<br><span style="opacity:.85">Fix: ${esc(f.fix||"")}</span></li>`
+  ).join("");
+  const locked = data.locked>0
+    ? `<p class="microhint">🔒 <b>${data.locked} more flag${data.locked>1?"s":""}</b> found${data.ai===false?" by the automatic check":""} — the AI upgrade (£4.99/month) gets Claude to read the whole CV: every flag, each with a concrete fix.` +
+      (data.checkoutUrl?` <a href="${esc(data.checkoutUrl)}" target="_blank" rel="noopener">Unlock the full check →</a>`:"") + `</p>`
+    : (data.ai===false ? `<p class="microhint">Automatic checks passed — the AI upgrade digs into wording, evidence and role keywords.</p>` : "");
+  const p=$("diagnosePanel");
+  p.innerHTML =
+    `<div class="pt-bar" onclick="togglePanel('diagnosePanel')">🩺 Health check — score ${score}` +
+    `<span class="pt-hint"><span class="pt-close">▾ hide</span><span class="pt-open">▸ show</span></span></div>` +
+    `<div class="score-row"><span class="score-badge ${cls}">${score}</span>` +
+    `<div><div class="sp-title" style="margin:0">CV health score</div><div style="font-size:13px">${esc(r.summary||"")}</div></div></div>` +
+    (flags?`<ul>${flags}</ul>`:"") + locked +
+    `<p class="microhint">Fix the flags (the builder steps and ✨ AI rewrite help), then check again — watch the score climb before you apply.</p>`;
+  p.classList.remove("collapsed");
+  p.classList.add("show");
+}
+function togglePanel(id){ $(id).classList.toggle("collapsed"); }
+
+/* ---------- ⓘ info popovers ---------- */
+function toggleInfo(id, e){
+  if(e) e.stopPropagation();
+  const el=$(id); if(!el) return;
+  const wasOpen=el.classList.contains("show");
+  document.querySelectorAll(".info-pop.show").forEach(p=>p.classList.remove("show"));
+  if(!wasOpen) el.classList.add("show");
+}
+document.addEventListener("click", e=>{
+  if(!e.target.closest(".info-wrap"))
+    document.querySelectorAll(".info-pop.show").forEach(p=>p.classList.remove("show"));
+});
+
+/* ---------- preview pane menu: CV / honest review / interview ---------- */
+let curPane="cv";
+function setPane(p){
+  curPane=p;
+  const show=(id,on)=>{ const el=$(id); if(el) el.style.display=on?"":"none"; };
+  const act=(id,on)=>{ const el=$(id); if(el) el.classList.toggle("active",on); };
+  act("pmCV", p==="cv");
+  act("pmImport", p==="import");
+  act("pmHealth", p==="health");
+  act("pmTailor", p==="tailor");
+  act("pmReview", p==="review");
+  act("pmInterview", p==="interview");
+  show("previewControls", p==="cv");
+  show("cv", p==="cv");
+  show("exportBar", p==="cv");
+  show("importPanel", p==="import");
+  show("healthPanel", p==="health");
+  show("tailorPane", p==="tailor");
+  show("gapsPanel", p==="review");
+  show("aiWrap", p==="cv"||p==="interview");
+  show("interviewPanel", p==="interview");
+  if(p==="review" && !$("gapsPanel").innerHTML.trim())
+    $("gapsPanel").innerHTML='<div class="card"><h2>🧭 Honest review</h2><p class="hint" style="margin-bottom:0">Fill in a few steps first — this panel lists honest gaps in your CV and three concrete actions to strengthen your next application.</p></div>';
+}
+
+/* ---------- template picker grid (visual mini-previews) ---------- */
+const TPL_ORDER=["modern","classic","minimal","elegant","executive","contemporary","onyx","forest","ivory",
+  "sapphire","regal","copper","blush","sand",
+  "banner","cobalt","pearl","graphite","steel","midnight","aqua",
+  "sidebar","slate","merlot","emerald","carbon"];
+function tplThumbHtml(k){
+  const tpl=WORD_TEMPLATES[k], d=tpl.d;
+  const sec=`<div class="tt-bar" style="background:#${d.secColor}; height:3px"></div>`;
+  const lines='<div class="tt-line"></div><div class="tt-line"></div>';
+  if(tpl.layout==="sidebar"){
+    return `<div style="height:16px; background:#${tpl.headerBg}; flex-shrink:0"></div>`+
+      `<div class="tt-side"><div style="width:30%; background:#${tpl.sideBg}"></div>`+
+      `<div style="flex:1; padding-top:2px">${sec}${lines}${sec}<div class="tt-line"></div></div></div>`;
+  }
+  if(tpl.layout==="banner"){
+    const lightBanner = ["EEF1F5","DFF0EE"].includes(tpl.headerBg);
+    return `<div style="height:16px; background:#${tpl.headerBg}; flex-shrink:0; ${lightBanner?"border-bottom:1px solid #cfd9d6;":""}"></div>`+
+      `<div style="padding-top:2px">${sec}${lines}${sec}${lines}</div>`;
+  }
+  const nameStyle=`background:#${d.nameColor};`+(d.nameAlign==="center"?"margin-left:16px; margin-right:16px;":"margin-right:22px;");
+  return `<div style="padding-top:3px"><div class="tt-bar" style="${nameStyle}"></div>${sec}${lines}${sec}${lines}</div>`;
+}
+function drawTplGrid(){
+  const cur=v("f_wordtpl")||"modern";
+  const html=TPL_ORDER.filter(k=>WORD_TEMPLATES[k]).map(k=>{
+    const tag = k==="modern" ? " ★" : k==="minimal" ? " · ATS" : "";
+    return `<button type="button" class="tpl-card ${k===cur?"sel":""}" title="${WORD_TEMPLATES[k].label}" aria-pressed="${k===cur}" onclick="pickTpl('${k}')">`+
+      `<div class="tpl-thumb">${tplThumbHtml(k)}</div><div class="tpl-name">${WORD_TEMPLATES[k].label}${tag}</div></button>`;
+  }).join("");
+  $("tplGridModal").innerHTML = html;
+}
+let tplModalOpener = null;
+function openTplModal(){
+  const m=$("tplModal");
+  if(m.classList.contains("show")) return closeTplModal(); // the 🎨 button toggles
+  tplModalOpener = document.activeElement;
+  drawTplGrid();
+  m.classList.add("show");
+  document.body.classList.add("tpl-open");
+  const first = $("tplGridModal").querySelector(".tpl-card");
+  if(first) first.focus();
+}
+function closeTplModal(){
+  const wasOpen = $("tplModal").classList.contains("show");
+  $("tplModal").classList.remove("show");
+  document.body.classList.remove("tpl-open");
+  if(wasOpen && tplModalOpener){ tplModalOpener.focus(); tplModalOpener = null; }
+}
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape"){
+    closeTplModal();
+    document.querySelectorAll(".info-pop.show").forEach(p=>p.classList.remove("show"));
+  }
+});
+
+/* Honesty banner: one line, dismissible — the dismissal is remembered. */
+function dismissHonesty(){
+  $("honestyNote").style.display="none";
+  try{ localStorage.setItem("cvbuilder.honestyDismissed","1"); }catch(e){}
+}
+try{ if(localStorage.getItem("cvbuilder.honestyDismissed")==="1") $("honestyNote").style.display="none"; }catch(e){}
+
+/* "Save as PDF" just triggers the browser print dialog — tell people what to pick, once. */
+function dismissPdfNote(){
+  $("pdfNote").style.display="none";
+  try{ localStorage.setItem("cvbuilder.pdfNoteDismissed","1"); }catch(e){}
+}
+function downloadPDF(){
+  let dismissed=false;
+  try{ dismissed = localStorage.getItem("cvbuilder.pdfNoteDismissed")==="1"; }catch(e){}
+  if(!dismissed){ $("pdfNote").style.display="block"; }
+  setTimeout(()=>window.print(), dismissed?0:60);
+}
+/* Collapse the form pane so the whole CV can be previewed full-width. */
+function toggleFormPane(){
+  const collapsed=document.body.classList.toggle("form-collapsed");
+  const t=$("formToggle");
+  t.textContent = collapsed ? "»" : "«";
+  t.title = collapsed ? "Show the form" : "Hide the form — preview the whole CV";
+}
+function pickTpl(k){
+  if(!WORD_TEMPLATES[k]) return;
+  // Soft cross-fade so switching templates feels smooth rather than jumpy.
+  const cv=$("cv");
+  cv.style.opacity=".3";
+  setTimeout(()=>{
+    $("f_wordtpl").value=k;
+    applyTemplate(); // re-syncs the grid highlight too
+    scheduleSave();
+    cv.style.opacity="1";
+  },140);
+}
+
+/* ---------- step 1: role keyword gap (live UK advert corpus) ---------- */
+function setKwGapMsg(msg, isErr){
+  const el=$("kwgapMsg"); el.textContent=msg; el.classList.toggle("err", !!isErr);
+}
+async function keywordGapAI(){
+  const btn=$("btnKwGap");
+  btn.disabled=true;
+  const orig=btn.textContent;
+  btn.textContent="⏳ Reading live adverts…";
+  try{
+    let resp;
+    const headers={ "Content-Type":"application/json" };
+    if(licenseKey) headers["X-License-Key"]=licenseKey;
+    try{
+      resp = await fetchTimeout("/api/keyword-gap", {
+        method:"POST", headers,
+        body: JSON.stringify({ role: targetText(), facts: tailorFacts() })
+      });
+    }catch(networkErr){
+      setKwGapMsg(isAbort(networkErr) ? "This is taking too long — please try again." : "Couldn't reach the server. Check your internet connection and try again — your CV is saved in this browser.", true);
+      return;
+    }
+    const data = await resp.json().catch(()=>({}));
+    if(resp.status===402){
+      showUpgrade(data.checkoutUrl, licenseKey ? (data.error||"That licence key was not accepted.") : "", keywordGapAI);
+      return;
+    }
+    if(!resp.ok){ setKwGapMsg(data.error||"Role insight failed — please try again in a moment.", true); return; }
+    if(data.beta) $("betaBadge").classList.add("show");
+    renderKeywordGap(data);
+    setKwGapMsg("");
+  } finally {
+    btn.disabled=false;
+    btn.textContent=orig;
+  }
+}
+function renderKeywordGap(data){
+  const r=data.result||{};
+  const arr=a=>Array.isArray(a)?a:[];
+  const chips = arr(r.in_demand).map(k=>`<span class="kw-chip">${esc(k.keyword||"")}${k.seen_in?` ×${+k.seen_in}`:""}</span>`).join("");
+  const matched = arr(r.matched).map(m=>`<li>✅ <b>${esc(m.keyword||"")}</b> — ${esc(m.evidence||"")}</li>`).join("");
+  const missing = arr(r.missing).map(m=>
+    `<li>⚠ <b>${esc(m.keyword||"")}</b> — ${esc(m.why_it_matters||"")}<br><span style="opacity:.85">Close it: ${esc(m.how_to_get_it||"")}</span></li>`
+  ).join("");
+  const p=$("kwgapPanel");
+  p.innerHTML =
+    `<div class="sp-title">In demand across ${+data.adverts||0} current adverts for “${esc(targetText())}”</div><div>${chips}</div>` +
+    (matched?`<div class="sp-title" style="margin-top:10px">You can already evidence</div><ul>${matched}</ul>`:"") +
+    (missing?`<div class="sp-title" style="margin-top:10px">Honest gaps — never add these to the CV; close them for real</div><ul>${missing}</ul>`:"") +
+    `<p class="microhint">Did one of the gap questions ring true? Add what you actually did in steps 3–4 and the ✨ buttons will word it properly.</p>`;
+  p.classList.add("show");
+}
+
+/* ---------- interview practice (preview pane) ----------
+   Stateless server: the browser holds the whole transcript and sends it back
+   on every turn. It autosaves with the rest of the form. */
+const IV = { transcript: [], done: false };
+function setIvMsg(msg, isErr){
+  const el=$("ivMsg"); el.textContent=msg; el.classList.toggle("err", !!isErr);
+}
+function ivAppend(cls, html){
+  const c=$("ivChat"); c.style.display="flex";
+  const d=document.createElement("div"); d.className=cls; d.innerHTML=html;
+  c.appendChild(d); c.scrollTop=c.scrollHeight;
+}
+function renderInterviewChat(){
+  const c=$("ivChat"); c.innerHTML="";
+  $("ivAnswerRow").style.display = (IV.transcript.length && !IV.done) ? "flex" : "none";
+  $("btnIvReset").style.display = IV.transcript.length ? "inline-block" : "none";
+  $("btnInterview").style.display = IV.transcript.length ? "none" : "inline-block";
+  if(!IV.transcript.length){ c.style.display="none"; return; }
+  IV.transcript.forEach(m=>{
+    if(m.role==="user"){ ivAppend("iv-a", esc(m.content)); return; }
+    let r=null; try{ r=JSON.parse(m.content); }catch(e){}
+    if(!r){ ivAppend("iv-q", esc(m.content)); return; }
+    if(r.rating!=null) ivAppend("iv-fb", `<span class="iv-score">${esc(String(r.rating))}/10</span> — ${esc(r.feedback||"")}`);
+    if(r.done && r.summary) ivAppend("iv-fb", ivSummaryHtml(r.summary));
+    else if(r.next_question) ivAppend("iv-q", esc(r.next_question));
+  });
+}
+function ivSummaryHtml(s){
+  const li=x=>`<li>${esc(x)}</li>`;
+  return `<b>Interview complete — overall ${esc(String(s.overall!=null?s.overall:"?"))}/10</b>` +
+    (Array.isArray(s.strengths)&&s.strengths.length?`<br><b>Strengths:</b><ul>${s.strengths.map(li).join("")}</ul>`:"") +
+    (Array.isArray(s.work_on)&&s.work_on.length?`<b>Work on before the real thing:</b><ul>${s.work_on.map(li).join("")}</ul>`:"");
+}
+async function callInterview(){
+  const btns=[$("btnInterview"),$("btnIvSend")];
+  btns.forEach(b=>b.disabled=true);
+  setIvMsg("⏳ The interviewer is thinking…");
+  try{
+    let resp;
+    const headers={ "Content-Type":"application/json" };
+    if(licenseKey) headers["X-License-Key"]=licenseKey;
+    try{
+      resp = await fetchTimeout("/api/interview", {
+        method:"POST", headers,
+        body: JSON.stringify({
+          role: targetText(),
+          advert: v("f_jobdesc").slice(0,12000),
+          facts: tailorFacts(),
+          transcript: IV.transcript
+        })
+      });
+    }catch(networkErr){
+      setIvMsg(isAbort(networkErr) ? "This is taking too long — please try again." : "Couldn't reach the server. Check your internet connection and try again — your CV is saved in this browser.", true);
+      return;
+    }
+    const data = await resp.json().catch(()=>({}));
+    if(resp.status===402){
+      showUpgrade(data.checkoutUrl, licenseKey ? (data.error||"That licence key was not accepted.") : "Interview practice is part of the AI upgrade (£4.99/month).", callInterview);
+      setIvMsg("Interview practice needs the AI upgrade — subscribe (or paste your licence key) in the panel below, then press start again.", true);
+      return;
+    }
+    if(!resp.ok){ setIvMsg(data.error||"The interviewer lost their train of thought — please try again.", true); return; }
+    if(data.beta) $("betaBadge").classList.add("show");
+    const r=data.result;
+    if(!r || typeof r !== "object"){
+      setIvMsg("The interviewer sent back something unreadable — please try again.", true);
+      return;
+    }
+    IV.transcript.push({ role:"assistant", content: JSON.stringify(r) });
+    if(r.done) IV.done=true;
+    renderInterviewChat();
+    setIvMsg(r.done ? "Interview finished — read the feedback above, then ↺ Start again any time." : "");
+    scheduleSave();
+  } finally {
+    btns.forEach(b=>b.disabled=false);
+  }
+}
+function startInterview(){
+  if($("cv").innerText.trim().length < 80 && !v("f_name")){
+    setIvMsg("Fill in a few steps first — the interviewer asks about what's on your CV.", true);
+    return;
+  }
+  callInterview();
+}
+function sendInterviewAnswer(){
+  const text=v("ivAnswer");
+  if(!text){ setIvMsg("Type your answer first — rough wording is fine.", true); return; }
+  IV.transcript.push({ role:"user", content:text });
+  $("ivAnswer").value="";
+  renderInterviewChat();
+  scheduleSave();
+  callInterview();
+}
+function resetInterview(){
+  if(IV.transcript.length && !IV.done && !confirm("Abandon this practice interview and start a fresh one?")) return;
+  IV.transcript=[]; IV.done=false;
+  renderInterviewChat();
+  setIvMsg("");
+  scheduleSave();
+}
+
+/* ---------- optional-feature discovery ---------- */
+async function initExtras(){
+  renderInterviewChat(); // restore any saved practice interview
+  try{
+    const resp = await fetchTimeout("/api/features");
+    const feats = await resp.json();
+    if(feats && feats.keywordGap) $("kwgapField").style.display="block";
+  }catch(e){ /* offline / plain-file mode: optional features stay hidden */ }
+}
+
 /* ================= init ================= */
-["f_name","f_city","f_email","f_phone","f_links","f_target","f_school","f_schooldates","f_gcse",
+// Force every tracked field blank if we just landed here via "Clear & start
+// over" — overrides whatever the browser tried to restore into them (see
+// clearSaved()'s comment). Must run before restoreState() and before the
+// field listeners below so this blanking never itself gets read as input.
+try{
+  if(sessionStorage.getItem("cvbuilder.justCleared") === "1"){
+    sessionStorage.removeItem("cvbuilder.justCleared");
+    const blankTrackedFields = ()=>{
+      SAVED_FIELDS.forEach(id=>{ const el=$(id); if(el) el.value=""; });
+      $("f_joburl").value=""; $("f_jobdesc").value="";
+      // Qualifications/projects/jobs are rebuilt from these arrays, not read
+      // directly off static inputs — reset and redraw so stale values the
+      // browser injects into the freshly-created rows never make it back
+      // into S (their oninput handlers are what would otherwise capture them).
+      S.qualifications=[]; S.projects=[]; S.jobs=[];
+      addQualification(); addQualification(); addQualification();
+      drawProjects(); drawJobs();
+    };
+    blankTrackedFields();
+    // Chrome/Edge can autofill name/email/address fields (and, it turns out,
+    // dynamically-created qualification rows) asynchronously, after the page
+    // has already painted — a one-off clear isn't always enough to beat it,
+    // so keep re-clearing for the first couple of seconds.
+    [50,200,500,1000,2000].forEach(ms=>setTimeout(()=>{ blankTrackedFields(); render(); }, ms));
+  }
+}catch(e){}
+["f_stage","f_name","f_dob","f_address","f_email","f_phone","f_links","f_profile","f_target","f_school","f_schooldates","f_gcse",
  "f_quant","f_skills","f_responsibility","f_football","f_fitness","f_awards","f_interests"]
  .forEach(id=>{ $(id).addEventListener("input",render); $(id).addEventListener("change",render); });
+// job-advert fields don't change the preview, but must still autosave
+["f_joburl","f_jobdesc"].forEach(id=>{ $(id).addEventListener("input",scheduleSave); $(id).addEventListener("change",scheduleSave); });
+// free-text role box: re-word step 3 as they type or pick a suggestion
+$("f_target").addEventListener("input", applyStep3Copy);
 $("f_target").addEventListener("change", applyStep3Copy);
 $("f_wordtpl").addEventListener("change", applyTemplate);
-addALevel(); addALevel(); addALevel();
+// resume any work saved in this browser; otherwise start with 3 blank qualification rows
+const resumed = restoreState();
+if(S.qualifications.length){ drawQualifications(); } else { addQualification(); addQualification(); addQualification(); }
+if(S.projects.length) drawProjects();
+if(S.jobs.length) drawJobs();
 // landing page links open the builder with a template preselected (?template=sidebar)
 const qTpl = new URLSearchParams(location.search).get("template");
 if(qTpl && WORD_TEMPLATES[qTpl]) $("f_wordtpl").value = qTpl;
-drawStepper(); render(); applyStep3Copy(); applyTemplate();
+drawStepper(); render(); applyStep3Copy(); applyTemplate(); setPane("cv"); initExtras();
+if(resumed) setFlash("Welcome back — your saved progress was restored ✓");
 </script>
 </body>
 </html>

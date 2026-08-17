@@ -1,3 +1,25 @@
+<!--
+  BEFORE THIS PAGE GOES LIVE, fill in every bracketed placeholder — both here
+  and in the visible text below — then confirm the yellow banner disappears:
+    [PRIVACY_CONTACT_EMAIL] — a real inbox someone actually checks
+    [BUSINESS_NAME]         — the legal/trading name behind CV Builder
+    [HOSTING_PROVIDER]      — who hosts this server (used in "Who else sees my data?")
+  While any bracket remains, a small script near the end of this file scans
+  the rendered page text and shows a "not yet in force" banner automatically
+  — do not hide or delete that script as a way of "fixing" the banner.
+
+  Facts below were checked against the code on 2026-08-17:
+  - server logs are timestamp + status only, never CV content — server.js logEvent()
+  - uploaded files are held in RAM only (multer.memoryStorage()), never written to disk — server.js
+  - the app sets no cookies anywhere — grepped server.js, lib/*.js and every public/*.html, no matches
+  - the licence key lives in a plain JS variable only, never localStorage or a cookie — cv-builder.html licenseKey
+  - autosave writes to localStorage under the key "cvbuilder.v1"; "Clear & start over" removes it — cv-builder.html
+  Checked externally (not verifiable from this codebase — re-confirm before publishing if it's been a while):
+  - Anthropic's API privacy policy: https://www.anthropic.com/legal/privacy (not-used-for-training +
+    short-retention-for-abuse-review claims match Anthropic's published API data policy as of 2026-08)
+  - Lemon Squeezy's privacy policy: https://www.lemonsqueezy.com/privacy (merchant-of-record /
+    we-never-see-card-details claims match Lemon Squeezy's published terms as of 2026-08)
+-->
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
@@ -7,30 +29,64 @@
 <style>
   body{font-family:'Segoe UI', system-ui, -apple-system, Arial, sans-serif; background:#f2f4f8; color:#1a2332; line-height:1.6; margin:0;}
   main{max-width:680px; margin:40px auto; background:#fff; border:1px solid #dde3ec; border-radius:10px; padding:32px 36px;}
-  h1{font-size:1.4rem; color:#1f4e79;}
+  h1{font-size:1.4rem; color:#1f4e79; margin-bottom:4px;}
   h2{font-size:1rem; color:#1f4e79; margin-top:22px;}
   p{font-size:.92rem; margin-top:8px;}
+  li{font-size:.92rem; margin-top:6px;}
   a{color:#1f4e79;}
+  .updated{color:#5a6b80; font-size:.8rem; margin-top:0;}
   .back{display:inline-block; margin-top:26px; font-size:.85rem;}
+  .unfinished-banner{display:none; background:#fff3cd; border:1px solid #f0c14b; color:#5c4400; padding:10px 14px; border-radius:8px; font-size:.85rem; font-weight:600; margin-bottom:20px;}
 </style>
 </head>
 <body>
 <main>
-  <h1>Privacy</h1>
+  <div class="unfinished-banner" id="unfinishedBanner" role="alert">⚠ This page isn't finished yet — some placeholder details still need filling in before it's ready to use.</div>
 
-  <h2>Your CV data</h2>
-  <p>When you use "Generate with AI", the facts you entered are sent to our server, processed in memory to generate the rewritten CV, and returned to your browser. CV content is <strong>not stored</strong> on our server, not logged, and <strong>not used for AI training</strong>. Our server logs contain only timestamps and request statuses. Everything else in the app (the live preview, PDF and Word export) runs entirely in your browser.</p>
+  <h1>Privacy</h1>
+  <p class="updated">Last updated: 17 August 2026</p>
+
+  <p>This is CV Builder, run by [BUSINESS_NAME]. Here's what happens to your information when you use it.</p>
+
+  <h2>What happens to my CV?</h2>
+  <p>Most of the app runs on your own device — typing your details, previewing your CV, saving it as a PDF or Word file. None of that reaches our server.</p>
+  <p>Only when you press an "AI" button (like "Generate with AI") do we send your typed text to our server. We hold it in memory just long enough to get a reply, send that straight to your browser, then forget it — nobody looks through it or saves a copy.</p>
+  <p>Your progress also saves automatically, but only inside your own browser ("local storage"). It stays on this device until you clear it.</p>
+  <p>On a shared computer — school library, college IT room? Click "Clear &amp; start over" before you log off, or the next person could see your CV.</p>
+  <p>We don't use cookies either — nothing tracks you between visits.</p>
+
+  <h2>Who else sees my data?</h2>
+  <p>Two other companies help us run this:</p>
+  <ul>
+    <li><strong>Anthropic</strong> makes the AI that writes and checks your CV. Your text goes to them to get a reply. They say it's never used to train their models, and kept only briefly, in case it's needed to check for abuse. <a href="https://www.anthropic.com/legal/privacy" rel="noopener" target="_blank">Their privacy policy</a>.</li>
+    <li><strong>Lemon Squeezy</strong> handles payment if you subscribe, as "merchant of record" — they take your card details directly, so we never see or store them. <a href="https://www.lemonsqueezy.com/privacy" rel="noopener" target="_blank">Their privacy policy</a>.</li>
+    <li><strong><a href="[HOSTING_PROVIDER]" rel="noopener" target="_blank">[HOSTING_PROVIDER]</a></strong> hosts the server this app runs on.</li>
+  </ul>
 
   <h2>Licence keys</h2>
-  <p>If you paste a licence key, it is kept in your browser tab's memory only — never in localStorage or cookies — and sent to our server solely to validate your subscription.</p>
+  <p>If you subscribe, you get a licence key by email. Paste it in and it's remembered only while that browser tab stays open — never saved to your browser's storage or as a cookie. Close the tab, and it's gone; just paste it in again next time.</p>
 
-  <h2>Payments</h2>
-  <p>Payments and subscriptions are handled by Lemon Squeezy, our merchant of record. We never see your card details. See the <a href="https://www.lemonsqueezy.com/privacy" rel="noopener">Lemon Squeezy privacy policy</a>.</p>
+  <h2>If you're under 16</h2>
+  <p>UK law says a parent or guardian should agree to any subscription or payment — check with them before you subscribe. Everything else here works the same whatever your age: your details are processed in memory, nothing is stored on our server.</p>
+
+  <h2>Your rights</h2>
+  <p>Under UK data protection law (UK GDPR), you have rights over your own information — even though this app doesn't keep an "account" for you.</p>
+  <ul>
+    <li><strong>Asking what we hold:</strong> usually nothing — we don't keep a copy of your CV or answers once a reply's gone back to your browser.</li>
+    <li><strong>Asking us to delete something:</strong> same reason, nothing to delete on our end. To delete your own copy: "Clear &amp; start over," or clear your browser's site data.</li>
+    <li><strong>Complaining:</strong> if we've handled your information wrongly, complain to the UK regulator, the ICO, at <a href="https://ico.org.uk" rel="noopener" target="_blank">ico.org.uk</a>.</li>
+  </ul>
 
   <h2>Contact</h2>
-  <p>Questions about your data: <a href="mailto:privacy@example.com">privacy@example.com</a> <em>(placeholder — replace with your contact address)</em>.</p>
+  <p>Questions about any of this? Email [BUSINESS_NAME] at <a href="mailto:[PRIVACY_CONTACT_EMAIL]">[PRIVACY_CONTACT_EMAIL]</a>.</p>
 
   <a class="back" href="/">← Back to CV Builder</a>
 </main>
+<script>
+  (function(){
+    var hasPlaceholder = /\[[A-Z_]+\]/.test(document.body.textContent);
+    if (hasPlaceholder) document.getElementById('unfinishedBanner').style.display = 'block';
+  })();
+</script>
 </body>
 </html>

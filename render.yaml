@@ -1,0 +1,24 @@
+# Render blueprint — deploys CV Studio as a free web service.
+# Connect this repo at https://dashboard.render.com → New → Blueprint.
+services:
+  - type: web
+    name: cv-builder
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/features
+    envVars:
+      # Paste the real key in the Render dashboard when prompted (sync: false
+      # means the value is never read from this file or the repo).
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ANTHROPIC_MODEL
+        value: claude-opus-5
+      - key: INTERVIEW_MODEL
+        value: claude-sonnet-5
+      # false = AI routes need a paid licence key (safe default; nobody can
+      # spend your Anthropic credits). Flip to "true" in the Render dashboard
+      # to open AI to everyone, protected by the per-IP hourly limits.
+      - key: BETA_MODE
+        value: "false"

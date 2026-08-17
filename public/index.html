@@ -7,11 +7,11 @@
 <style>
   :root{
     --ink:#16324f; --ink-soft:#3d4d5e; --ink-faint:#7b8794;
-    --accent:#1d63b8; --accent-dark:#164e91; --ok:#1e7d4f; --ok-bg:#e9f6ef;
+    --accent:#1f4e79; --accent-dark:#163a5a; --ok:#1e7d4f; --ok-bg:#e9f6ef;
     --bg:#f4f7fb; --card:#fff; --line:#dce3ec;
   }
   *{margin:0; padding:0; box-sizing:border-box;}
-  body{font-family:'Segoe UI', system-ui, -apple-system, Arial, sans-serif; color:var(--ink-soft); background:var(--card);}
+  body{font-family:'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif; color:var(--ink-soft); background:var(--card);}
   a{text-decoration:none;}
   .wrap{max-width:1080px; margin:0 auto; padding:0 20px;}
 
@@ -28,15 +28,15 @@
 
   /* hero */
   .hero{background:linear-gradient(180deg, var(--bg), #fff); padding:64px 0 48px; text-align:center;}
-  .hero h1{font-size:2.5rem; line-height:1.15; color:var(--ink); max-width:760px; margin:0 auto 16px;}
+  .hero h1{font-size:2.3rem; font-weight:700; letter-spacing:.4px; line-height:1.18; color:var(--ink); max-width:760px; margin:0 auto 16px;}
   .hero p{font-size:1.1rem; max-width:620px; margin:0 auto 26px;}
   .trust{margin-top:18px; font-size:.85rem; color:var(--ink-faint);}
   .trust b{color:var(--ok);}
 
   /* template chooser */
   .choose{padding:56px 0 30px; background:#fff;}
-  .choose h2, .steps h2{font-size:1.7rem; color:var(--ink); text-align:center; margin-bottom:8px;}
-  .choose .sub, .steps .sub{text-align:center; margin-bottom:34px; color:var(--ink-faint);}
+  .choose h2, .steps h2, .toolkit h2{font-size:1.7rem; color:var(--ink); text-align:center; margin-bottom:8px;}
+  .choose .sub, .steps .sub, .toolkit .sub{text-align:center; margin-bottom:34px; color:var(--ink-faint);}
   .tpl-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:26px;}
   .tpl-card{border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--card);
             transition:box-shadow .15s, transform .15s; display:flex; flex-direction:column;}
@@ -69,6 +69,10 @@
   .thumb.banner .t-banner .t-name{background:#fff; margin:0 auto 4px;}
   .thumb.banner .t-banner .t-line{background:#7fa9dd; width:50%; margin:0 auto;}
   .thumb.banner .t-bodycol{padding:0 12px;}
+  /* "+20 more" card */
+  .thumb.more{display:flex; align-items:center; justify-content:center; background:var(--bg);}
+  .thumb.more .swatches{display:grid; grid-template-columns:repeat(5,34px); gap:8px;}
+  .thumb.more .sw{height:46px; border-radius:4px; border:1px solid rgba(0,0,0,.08);}
 
   /* steps */
   .steps{background:var(--bg); padding:56px 0;}
@@ -79,16 +83,47 @@
   .step-card h3{color:var(--ink); margin-bottom:8px; font-size:1.05rem;}
   .step-card p{font-size:.9rem; line-height:1.5;}
 
-  /* features + cta */
-  .features{padding:52px 0; text-align:center;}
-  .features ul{list-style:none; display:flex; flex-wrap:wrap; gap:14px 30px; justify-content:center; margin-top:18px;}
-  .features li{font-size:.92rem;}
-  .features li::before{content:"✓ "; color:var(--ok); font-weight:800;}
+  /* toolkit */
+  .toolkit{padding:56px 0;}
+  .tool-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:22px;}
+  .tool-card{border:1px solid var(--line); border-radius:12px; padding:20px 22px; background:var(--card);}
+  .tool-card h3{color:var(--ink); font-size:1rem; margin-bottom:6px;}
+  .tool-card p{font-size:.88rem; line-height:1.5;}
+  .tag{display:inline-block; font-size:.68rem; font-weight:800; border-radius:12px; padding:2px 10px;
+       vertical-align:2px; margin-left:6px; letter-spacing:.3px;}
+  .tag.free{background:var(--ok-bg); color:var(--ok); border:1px solid var(--ok);}
+  .tag.ai{background:#eef3fa; color:var(--accent); border:1px solid var(--accent);}
+
+  /* cta */
   .cta{background:var(--ink); color:#dbe4ee; text-align:center; padding:56px 20px;}
   .cta h2{color:#fff; font-size:1.6rem; margin-bottom:10px;}
   .cta p{margin-bottom:22px;}
   .badge{display:inline-block; background:var(--ok-bg); color:var(--ok); border:1px solid var(--ok);
          border-radius:20px; padding:3px 14px; font-size:.78rem; font-weight:700; margin-bottom:14px;}
+
+  /* pricing */
+  .pricing{background:var(--bg); padding:56px 0;}
+  .pricing h2{font-size:1.7rem; color:var(--ink); text-align:center; margin-bottom:8px;}
+  .pricing .sub{text-align:center; margin-bottom:34px; color:var(--ink-faint);}
+  .price-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:26px; max-width:760px; margin:0 auto;}
+  .price-card{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:28px 26px; display:flex; flex-direction:column;}
+  .price-card.featured{border:2px solid var(--accent); box-shadow:0 8px 26px rgba(20,40,70,.12); position:relative;}
+  .price-card .plan{font-weight:800; color:var(--ink); font-size:1.05rem; margin-bottom:6px;}
+  .price-card .amount{font-size:2.1rem; font-weight:800; color:var(--ink); margin-bottom:2px;}
+  .price-card .amount small{font-size:.95rem; font-weight:600; color:var(--ink-faint);}
+  .price-card .per{font-size:.85rem; color:var(--ink-faint); margin-bottom:16px;}
+  .price-card ul{list-style:none; margin:0 0 22px; flex:1;}
+  .price-card li{font-size:.9rem; padding:5px 0; line-height:1.45;}
+  .price-card li::before{content:"✓ "; color:var(--ok); font-weight:800;}
+  .price-card .btn{text-align:center;}
+  .price-card .note{font-size:.78rem; color:var(--ink-faint); margin-top:12px; text-align:center;}
+  .beta-flag{position:absolute; top:-13px; left:50%; transform:translateX(-50%); background:var(--ok); color:#fff;
+             border-radius:20px; padding:3px 16px; font-size:.75rem; font-weight:700; white-space:nowrap;}
+
+  /* contact */
+  .contact{padding:44px 20px; text-align:center;}
+  .contact h2{font-size:1.3rem; color:var(--ink); margin-bottom:8px;}
+  .contact p{font-size:.92rem;}
 
   footer{border-top:1px solid var(--line); padding:18px 20px 24px; text-align:center; font-size:.8rem; color:var(--ink-faint);}
   footer a{color:var(--accent);}
@@ -101,26 +136,39 @@
 <nav class="nav">
   <div class="wrap">
     <div class="logo">CV<span>Builder</span></div>
-    <a class="btn" href="/app">Create my CV</a>
+    <div style="display:flex; align-items:center; gap:6px;">
+      <a class="btn ghost" href="#pricing">Pricing</a>
+      <a class="btn" href="/app">Create my CV</a>
+    </div>
   </div>
 </nav>
 
 <section class="hero">
   <div class="wrap">
-    <div class="badge">Free during beta</div>
+    <div class="badge">Free to build &amp; export · AI upgrade £4.99/month</div>
     <h1>Build a job-winning CV in minutes — honest, UK-format, school-leaver friendly</h1>
-    <p>Answer five short steps, watch your CV build itself live, then export it as PDF or Word.
-       AI polishes your wording using strict no-invention rules — it never makes anything up.</p>
-    <a class="btn big" href="#chooseTemplate">Choose your template</a>
+    <p>Fill in five short steps (or import your old CV), watch it build itself live on an A4 page,
+       then download it as PDF or a real Word file. Everything you leave blank is simply left out — nothing is ever invented.</p>
+    <a class="btn big" href="/app">Create my CV — it's free</a>
     <div class="trust"><b>✓</b> No photo, no waffle, no fabricated buzzwords — just the CV UK recruiters expect.</div>
   </div>
 </section>
 
 <section class="choose" id="chooseTemplate">
   <div class="wrap">
-    <h2>Choose your CV template</h2>
-    <p class="sub">Pick a design to start with — you can switch templates any time and your content stays put.</p>
+    <h2>26 recruiter-ready templates</h2>
+    <p class="sub">A few favourites below — all 26 are in the app as one-click mini-previews. Switch any time; your content stays put, and every design downloads as a real, editable Word file.</p>
     <div class="tpl-grid">
+
+      <div class="tpl-card">
+        <div class="thumb modern">
+          <div class="t-name"></div><div class="t-line short"></div>
+          <div class="t-sec"></div><div class="t-line"></div><div class="t-line"></div><div class="t-line short"></div>
+          <div class="t-sec"></div><div class="t-line"></div><div class="t-line short"></div>
+          <div class="t-sec"></div><div class="t-line"></div><div class="t-line"></div>
+        </div>
+        <div class="meta"><div class="name">Modern <span style="font-weight:400;color:var(--ink-faint)">(our default)</span></div><a class="btn" href="/app?template=modern">Use this template</a></div>
+      </div>
 
       <div class="tpl-card">
         <div class="thumb classic">
@@ -130,16 +178,6 @@
           <div class="t-sec"></div><div class="t-line"></div><div class="t-line"></div>
         </div>
         <div class="meta"><div class="name">Classic</div><a class="btn" href="/app?template=classic">Use this template</a></div>
-      </div>
-
-      <div class="tpl-card">
-        <div class="thumb modern">
-          <div class="t-name"></div><div class="t-line short"></div>
-          <div class="t-sec"></div><div class="t-line"></div><div class="t-line"></div><div class="t-line short"></div>
-          <div class="t-sec"></div><div class="t-line"></div><div class="t-line short"></div>
-          <div class="t-sec"></div><div class="t-line"></div><div class="t-line"></div>
-        </div>
-        <div class="meta"><div class="name">Modern</div><a class="btn" href="/app?template=modern">Use this template</a></div>
       </div>
 
       <div class="tpl-card">
@@ -177,14 +215,16 @@
       </div>
 
       <div class="tpl-card">
-        <div class="thumb banner">
-          <div class="t-banner"><div class="t-name" style="width:60%"></div><div class="t-line"></div></div>
-          <div class="t-bodycol">
-            <div class="t-sec"></div><div class="t-line"></div><div class="t-line"></div><div class="t-line short"></div>
-            <div class="t-sec"></div><div class="t-line"></div><div class="t-line short"></div>
+        <div class="thumb more">
+          <div class="swatches">
+            <div class="sw" style="background:#1d63b8"></div><div class="sw" style="background:#2b2d31"></div>
+            <div class="sw" style="background:#6b1f2a"></div><div class="sw" style="background:#1e5c4f"></div>
+            <div class="sw" style="background:#b0713a"></div><div class="sw" style="background:#16408a"></div>
+            <div class="sw" style="background:#4a5560"></div><div class="sw" style="background:#8a5560"></div>
+            <div class="sw" style="background:#0f2438"></div><div class="sw" style="background:#c9a86a"></div>
           </div>
         </div>
-        <div class="meta"><div class="name">Banner</div><a class="btn" href="/app?template=banner">Use this template</a></div>
+        <div class="meta"><div class="name">…and 21 more</div><a class="btn ghost" href="/app">Browse them all in the app</a></div>
       </div>
 
     </div>
@@ -198,45 +238,123 @@
     <div class="steps-grid">
       <div class="step-card">
         <div class="num">1</div>
-        <h3>Pick a template</h3>
-        <p>Choose a design above — or import your existing CV (PDF, Word or text) and we'll fill the form for you automatically.</p>
+        <h3>Build it — or import it</h3>
+        <p>Answer five short steps: basics, education, projects, experience, interests. Already have a CV? Import the PDF or Word file and skip the typing. Everything autosaves in your browser.</p>
       </div>
       <div class="step-card">
         <div class="num">2</div>
-        <h3>Fill five short steps</h3>
-        <p>Basics, education, projects, experience, interests. AI suggests ideas suited to the job you're after and can write entries from your rough notes — only ever from facts you give it.</p>
+        <h3>Style it</h3>
+        <p>Pick from 26 designs with one-click mini-previews and watch the live A4 page restyle instantly. Modern is preselected — it's the layout UK recruiters see most.</p>
       </div>
       <div class="step-card">
         <div class="num">3</div>
-        <h3>Export &amp; apply</h3>
-        <p>Download as PDF or Word in your chosen template, plus an honest gap assessment and three concrete actions to strengthen your next application.</p>
+        <h3>Check it, then apply</h3>
+        <p>Score it the way an ATS reads it, tailor it to a specific job advert, get an honest review, even rehearse the interview — then download as PDF or a real Word file.</p>
       </div>
     </div>
   </div>
 </section>
 
-<section class="features">
+<section class="toolkit">
   <div class="wrap">
-    <h2 style="color:var(--ink); font-size:1.5rem;">Built for UK school leavers</h2>
-    <ul>
-      <li>UK format — no photo, no date of birth</li>
-      <li>Strict no-invention AI rules</li>
-      <li>Tailors wording to the role you pick</li>
-      <li>Live A4 preview as you type</li>
-      <li>Nothing stored — GDPR-friendly</li>
-      <li>Free while in beta</li>
-    </ul>
+    <h2>Everything in one place</h2>
+    <p class="sub">The same toolbar you'll see across the top of the app.</p>
+    <div class="tool-grid">
+      <div class="tool-card">
+        <h3>⚡ Import <span class="tag free">FREE</span></h3>
+        <p>Upload your existing CV (PDF, Word or text) — contact details are filled in automatically, no AI involved. With the AI upgrade, Claude reads the whole CV and fills every step of the form.</p>
+      </div>
+      <div class="tool-card">
+        <h3>🎨 Style it <span class="tag free">FREE</span></h3>
+        <p>All 26 templates with live mini-previews, unlimited switching, and unlimited PDF &amp; Word downloads. The Word file is a real .docx you can keep editing.</p>
+      </div>
+      <div class="tool-card">
+        <h3>🩺 Score it <span class="tag free">FREE</span></h3>
+        <p>An instant health score showing how an ATS reads your CV, plus the biggest problem to fix — 3 checks a day, no AI. The AI upgrade unlocks the full report: every flag, each with a concrete fix.</p>
+      </div>
+      <div class="tool-card">
+        <h3>🎯 Match a job <span class="tag ai">AI</span></h3>
+        <p>Paste a job advert and your profile is rewritten to speak to it, your skills resequenced to match — using only facts you've entered. Nothing added, nothing invented.</p>
+      </div>
+      <div class="tool-card">
+        <h3>🧭 Honest review <span class="tag ai">AI</span></h3>
+        <p>A straight-talking gap assessment of your CV and three concrete actions to strengthen your next application — no flattery, no fluff.</p>
+      </div>
+      <div class="tool-card">
+        <h3>🎤 Mock interview <span class="tag ai">AI</span></h3>
+        <p>Claude plays the hiring manager for your target role, asks realistic questions, rates every answer out of 10 and tells you exactly what to work on.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing" id="pricing">
+  <div class="wrap">
+    <h2>Simple, honest pricing</h2>
+    <p class="sub">Building and exporting your CV is free forever — no account, no card, no watermarks. One flat subscription unlocks every AI feature.</p>
+    <div class="price-grid">
+
+      <div class="price-card">
+        <div class="plan">Free</div>
+        <div class="amount">£0</div>
+        <div class="per">forever — no account, no card</div>
+        <ul>
+          <li>Five-step guided CV builder with live A4 preview</li>
+          <li>All 26 templates, switch any time</li>
+          <li>Unlimited PDF &amp; Word downloads — real, editable .docx</li>
+          <li>Import your old CV — contact details filled automatically</li>
+          <li>CV health score, 3 checks a day — see how an ATS reads it</li>
+          <li>Autosaves in your browser as you type</li>
+        </ul>
+        <a class="btn ghost" href="/app">Start building</a>
+        <div class="note">Your CV data stays in your browser.</div>
+      </div>
+
+      <div class="price-card featured">
+        <div class="beta-flag">All AI features</div>
+        <div class="plan">AI upgrade</div>
+        <div class="amount">£4.99 <small>/month</small></div>
+        <div class="per">one flat price · cancel any time — no lock-in</div>
+        <ul>
+          <li>Everything in Free, plus:</li>
+          <li>One-click AI rewrite — every bullet shaped as result + measure + method</li>
+          <li>Full health report — every flag an ATS would trip on, each with a fix</li>
+          <li>Match a job — profile &amp; skills tailored to a pasted advert, auto-applied</li>
+          <li>Honest review — gaps and three concrete next actions</li>
+          <li>Mock interview — realistic practice, every answer scored out of 10</li>
+          <li>Full AI import — your old CV read and every form step filled</li>
+          <li>Turn rough notes into CV-ready entries</li>
+          <li>Strict no-invention rules on every AI feature</li>
+          <!-- Enable once JOBPILOT_API_URL is live in production:
+          <li>Role reality check — your CV matched against live UK job adverts for your target role, with honest gaps and how to close them</li>
+          -->
+        </ul>
+        <a class="btn" href="/app">Get the AI upgrade</a>
+        <div class="note">Subscribe, get a licence key by email, paste it into the app — no account needed.</div>
+      </div>
+
+    </div>
   </div>
 </section>
 
 <section class="cta">
   <h2>Your next application deserves a better CV</h2>
-  <p>Start now — it's free during beta, and your data never leaves your browser except to generate your CV.</p>
+  <p>Start now — building and exporting is free, and your data never leaves your browser except to generate your CV.</p>
   <a class="btn big" href="/app">Create my CV</a>
 </section>
 
+<!-- TODO before launch: replace [CONTACT_EMAIL] with a real inbox someone
+     actually checks (can be the same address as [PRIVACY_CONTACT_EMAIL] in
+     privacy.html, or a separate one) — do not deploy with the bracket still showing. -->
+<section class="contact">
+  <div class="wrap">
+    <h2>Contact us</h2>
+    <p>Questions, feedback, or something not working? Email us at <a href="mailto:[CONTACT_EMAIL]">[CONTACT_EMAIL]</a>.</p>
+  </div>
+</section>
+
 <footer>
-  CV Builder · <a href="/privacy">Privacy</a> · Your CV data is processed in memory to generate output — never stored, never used for training.
+  CV Builder · <a href="/privacy">Privacy</a> · <a href="mailto:[CONTACT_EMAIL]">Contact</a> · Your CV data is processed in memory to generate output — never stored, never used for training.
 </footer>
 
 </body>
