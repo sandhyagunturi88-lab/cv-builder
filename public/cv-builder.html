@@ -596,6 +596,28 @@
   }
   .site-footer a{color:var(--accent);}
 
+  /* ---------- floating quick-help widget (canned answers, no external chat
+     service — nothing typed here ever leaves the browser) ---------- */
+  .help-fab{
+    position:fixed; right:18px; bottom:18px; z-index:180;
+    background:var(--accent); color:#fff; border:none; border-radius:24px;
+    padding:10px 16px; font-size:.85rem; font-weight:700; cursor:pointer;
+    font-family:inherit; box-shadow:0 4px 16px rgba(10,25,45,.3);
+  }
+  .help-panel{
+    display:none; position:fixed; right:18px; bottom:64px; z-index:180;
+    width:min(340px, calc(100vw - 36px)); max-height:min(480px, 70vh); overflow-y:auto;
+    background:var(--card); border:1px solid var(--line); border-radius:12px;
+    box-shadow:0 12px 40px rgba(10,25,45,.3); padding:14px 16px;
+  }
+  .help-panel.show{display:block;}
+  .help-panel h3{color:var(--accent); font-size:.95rem; margin-bottom:6px;}
+  .help-panel details{border-bottom:1px solid var(--line); padding:7px 0; font-size:.82rem;}
+  .help-panel details:last-of-type{border-bottom:none;}
+  .help-panel summary{cursor:pointer; font-weight:600; color:var(--ink-soft);}
+  .help-panel details p{margin-top:6px; color:var(--ink-soft);}
+  @media print{ .help-fab, .help-panel{display:none !important;} }
+
   /* ---------- Print: only the CV ---------- */
   @media print{
     body{background:#fff;}
@@ -1032,9 +1054,14 @@
             <input type="text" id="f_licensekey" placeholder="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" autocomplete="off">
             <button class="btn small" onclick="useLicenseKey()">Use key</button>
           </div>
-          <p class="microhint">The key stays in memory for this tab only — it is not written to localStorage or cookies.</p>
+          <label class="microhint" style="display:flex; gap:6px; align-items:flex-start; cursor:pointer">
+            <input type="checkbox" id="f_rememberkey" style="margin-top:2px">
+            <span>Remember my key on this device — saved only in this browser, never on our server. <b>Leave unticked on shared or school computers.</b></span>
+          </label>
+          <p class="microhint">Unticked, the key stays in memory for this tab only and is forgotten when you close it.</p>
         </div>
         <p class="ai-msg err" id="upgradeMsg" aria-live="polite"></p>
+        <p class="microhint" style="margin-top:10px">Subscribed already? <a href="https://app.lemonsqueezy.com/my-orders" target="_blank" rel="noopener">Manage or cancel your subscription</a> any time — cancelling stops the payments and the AI features, while building, previewing and exporting stay free forever. Lost your key or something's wrong? <a href="mailto:sandhya.gunturi88@gmail.com">Contact us</a> — a human reads every email.</p>
       </div>
     </div>
 
@@ -1075,8 +1102,24 @@
   </div>
 </div>
 
+<button class="help-fab" id="helpFab" onclick="toggleHelp()" aria-expanded="false" aria-controls="helpPanel">💬 Help</button>
+<div class="help-panel" id="helpPanel" role="dialog" aria-label="Quick help">
+  <h3>💬 Quick help</h3>
+  <details><summary>I paid but didn't get a licence key</summary>
+    <p>Don't worry — your money isn't lost. The key is emailed automatically by Lemon Squeezy (our payment provider) within a couple of minutes of paying. Check the inbox you paid with, including spam, for an email from Lemon Squeezy. You can also see it any time in <a href="https://app.lemonsqueezy.com/my-orders" target="_blank" rel="noopener">your order portal</a>.</p></details>
+  <details><summary>My key says "not accepted"</summary>
+    <p>Paste the whole key exactly as it appears in the email (copy-paste beats typing). If it still fails, check in <a href="https://app.lemonsqueezy.com/my-orders" target="_blank" rel="noopener">your order portal</a> that the subscription is still active — a cancelled or failed payment stops the key working.</p></details>
+  <details><summary>How do I cancel my subscription?</summary>
+    <p>Open <a href="https://app.lemonsqueezy.com/my-orders" target="_blank" rel="noopener">your order portal</a>, find CV Builder and choose cancel — no need to email anyone. The AI features stop; building, previewing and PDF/Word export stay free forever, and your CV stays right here in your browser.</p></details>
+  <details><summary>Buttons do nothing / everything is slow</summary>
+    <p>After a quiet spell our server takes up to a minute to wake up — wait a moment and try again. Your CV is safe: it lives in your own browser, not on the server.</p></details>
+  <details><summary>Where is my CV stored? Is it safe?</summary>
+    <p>Only on this device, in this browser — we never store your CV on our servers, and nothing you type is sent anywhere until you press an AI button. See the <a href="/privacy" target="_blank">privacy page</a> for the full picture.</p></details>
+  <p class="microhint" style="margin-top:10px">Still stuck? Email <a href="mailto:sandhya.gunturi88@gmail.com">sandhya.gunturi88@gmail.com</a> — a human reads every message. Nothing you type into this help panel is sent anywhere; it's just quick answers.</p>
+</div>
+
 <footer class="site-footer">
-  CV Builder · <a href="/privacy">Privacy</a> · <a href="mailto:[CONTACT_EMAIL]">Contact</a> · Your CV data is processed in memory to generate output — never stored on our servers, never used for training. Progress autosaves only to your own browser; "Clear &amp; start over" deletes it.
+  CV Builder · <a href="/privacy">Privacy</a> · <a href="mailto:sandhya.gunturi88@gmail.com">Contact</a> · Your CV data is processed in memory to generate output — never stored on our servers, never used for training. Progress autosaves only to your own browser; "Clear &amp; start over" deletes it.
 </footer>
 
 <script>
@@ -2518,7 +2561,12 @@ function renderNextActions(md){
   p.style.display="block";
 }
 let upgradeRetry = null; // the blocked action "Use key" should resume, once a key is accepted
+const KEY_STORE = "cvbuilder.licenseKey"; // written ONLY when "Remember my key" is ticked
 function showUpgrade(checkoutUrl, msg, retryFn){
+  // A non-empty msg here always means a pasted key was refused — if that key
+  // was remembered on this device, forget it so it isn't silently retried
+  // forever after a subscription ends.
+  if(licenseKey && msg){ try{ localStorage.removeItem(KEY_STORE); }catch(e){} }
   $("aiPanel").style.display="none";
   $("upgradeWrap").classList.add("show");
   // Only ever point the link at an https:// URL the server gave us — never let an
@@ -2531,10 +2579,19 @@ function showUpgrade(checkoutUrl, msg, retryFn){
 function closeUpgrade(){
   $("upgradeWrap").classList.remove("show");
 }
+function toggleHelp(){
+  const on = $("helpPanel").classList.toggle("show");
+  $("helpFab").setAttribute("aria-expanded", on ? "true" : "false");
+}
 function useLicenseKey(){
   licenseKey = v("f_licensekey");
   if(!licenseKey){ $("upgradeMsg").textContent="Paste your licence key first."; return; }
   $("upgradeMsg").textContent="";
+  // Opt-in persistence: save on tick, remove on untick — see the privacy page.
+  try{
+    if($("f_rememberkey").checked) localStorage.setItem(KEY_STORE, licenseKey);
+    else localStorage.removeItem(KEY_STORE);
+  }catch(e){}
   // A key is now in play — drop the locked styling and close the popup. If the
   // key turns out to be invalid, the next AI call 402s and reopens it with the
   // error message.
@@ -3169,6 +3226,7 @@ document.addEventListener("keydown", e=>{
   if(e.key==="Escape"){
     closeTplModal();
     closeUpgrade();
+    $("helpPanel").classList.remove("show");
     document.querySelectorAll(".info-pop.show").forEach(p=>p.classList.remove("show"));
   }
 });
@@ -3384,6 +3442,16 @@ async function initExtras(){
 /* ---------- paid-only lock: grey AI buttons, route clicks to subscribe ---------- */
 let aiLocked = false;
 let serverCheckoutUrl = "";
+// Restore a remembered key (opt-in checkbox) before initExtras() decides the
+// lock state — a returning subscriber lands already unlocked.
+try{
+  const savedKey = localStorage.getItem(KEY_STORE);
+  if(savedKey){
+    licenseKey = savedKey;
+    const cb=$("f_rememberkey"); if(cb) cb.checked = true;
+    const f=$("f_licensekey"); if(f) f.value = savedKey;
+  }
+}catch(e){}
 const AI_LOCK_IDS = ["btnAI","btnSuggest","btnPolish3","btnPolish4","btnPolish5","btnTailor","btnKwGap","btnInterview","btnIvSend"];
 function setAILocked(on){
   aiLocked = on;

@@ -12,7 +12,8 @@
   - server logs are timestamp + status only, never CV content — server.js logEvent()
   - uploaded files are held in RAM only (multer.memoryStorage()), never written to disk — server.js
   - the app sets no cookies anywhere — grepped server.js, lib/*.js and every public/*.html, no matches
-  - the licence key lives in a plain JS variable only, never localStorage or a cookie — cv-builder.html licenseKey
+  - the licence key lives in a plain JS variable; saved to localStorage ONLY when the
+    "Remember my key on this device" box is ticked (opt-in), never a cookie — cv-builder.html licenseKey
   - autosave writes to localStorage under the key "cvbuilder.v1"; "Clear & start over" removes it — cv-builder.html
   Checked externally (not verifiable from this codebase — re-confirm before publishing if it's been a while):
   - Anthropic's API privacy policy: https://www.anthropic.com/legal/privacy (not-used-for-training +
@@ -46,7 +47,7 @@
   <h1>Privacy</h1>
   <p class="updated">Last updated: 17 August 2026</p>
 
-  <p>This is CV Builder, run by [BUSINESS_NAME]. Here's what happens to your information when you use it.</p>
+  <p>This is CV Builder, run by Cardzo Entertainment LLP. Here's what happens to your information when you use it.</p>
 
   <h2>What happens to my CV?</h2>
   <p>Most of the app runs on your own device — typing your details, previewing your CV, saving it as a PDF or Word file. None of that reaches our server.</p>
@@ -60,11 +61,11 @@
   <ul>
     <li><strong>Anthropic</strong> makes the AI that writes and checks your CV. Your text goes to them to get a reply. They say it's never used to train their models, and kept only briefly, in case it's needed to check for abuse. <a href="https://www.anthropic.com/legal/privacy" rel="noopener" target="_blank">Their privacy policy</a>.</li>
     <li><strong>Lemon Squeezy</strong> handles payment if you subscribe, as "merchant of record" — they take your card details directly, so we never see or store them. <a href="https://www.lemonsqueezy.com/privacy" rel="noopener" target="_blank">Their privacy policy</a>.</li>
-    <li><strong><a href="[HOSTING_PROVIDER]" rel="noopener" target="_blank">[HOSTING_PROVIDER]</a></strong> hosts the server this app runs on.</li>
+    <li><strong><a href="https://render.com" rel="noopener" target="_blank">Render</a></strong> hosts the server this app runs on.</li>
   </ul>
 
   <h2>Licence keys</h2>
-  <p>If you subscribe, you get a licence key by email. Paste it in and it's remembered only while that browser tab stays open — never saved to your browser's storage or as a cookie. Close the tab, and it's gone; just paste it in again next time.</p>
+  <p>If you subscribe, you get a licence key by email. Paste it in and it's normally remembered only while that browser tab stays open — close the tab and it's gone; just paste it in again next time. If you tick <strong>"Remember my key on this device"</strong>, the key is saved in your own browser's storage on that device (never a cookie, never sent to our server for safe-keeping) until you untick the box or the key stops working. Don't tick it on a shared or school computer.</p>
 
   <h2>If you're under 16</h2>
   <p>UK law says a parent or guardian should agree to any subscription or payment — check with them before you subscribe. Everything else here works the same whatever your age: your details are processed in memory, nothing is stored on our server.</p>
@@ -78,7 +79,7 @@
   </ul>
 
   <h2>Contact</h2>
-  <p>Questions about any of this? Email [BUSINESS_NAME] at <a href="mailto:[PRIVACY_CONTACT_EMAIL]">[PRIVACY_CONTACT_EMAIL]</a>.</p>
+  <p>Questions about any of this? Email Cardzo Entertainment LLP at <a href="mailto:sandhya.gunturi88@gmail.com">sandhya.gunturi88@gmail.com</a>.</p>
 
   <a class="back" href="/">← Back to CV Builder</a>
 </main>
