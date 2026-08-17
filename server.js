@@ -18,6 +18,20 @@ function logEvent(route, status) {
   console.log(`${new Date().toISOString()} ${route} ${status}`);
 }
 
+// Every AI route's catch-all previously logged the status only, with the
+// actual error (a bad API key, an unavailable model, a billing/quota block,
+// a network failure) discarded -- making a 502 undiagnosable from the server
+// logs alone. Logs only the error's type/status/message, never request
+// content, CV facts, or model output.
+function logError(route, err) {
+  console.error(
+    `${new Date().toISOString()} ${route} error:`,
+    err && err.constructor && err.constructor.name,
+    err && (err.status || err.statusCode),
+    err && err.message
+  );
+}
+
 // Maps the typed model errors (lib/anthropic.js) to their specified 502
 // responses. Returns true (and sends the response) if it handled the error;
 // false if the caller should fall through to its own generic 502.
@@ -234,8 +248,9 @@ function createApp(options = {}) {
       logEvent('generate-cv', 200);
       res.json({ result, beta: !!access.beta });
     } catch (err) {
-      // Log status only — never the facts or the model output.
+      // Log the error type/status only — never the facts or the model output.
       if (handleModelError(err, res, 'generate-cv')) return;
+      logError('generate-cv', err);
       logEvent('generate-cv', 502);
       res.status(502).json({ error: 'CV generation failed. Please try again in a moment.' });
     }
@@ -263,6 +278,7 @@ function createApp(options = {}) {
       res.json({ result, beta: !!access.beta });
     } catch (err) {
       if (handleModelError(err, res, 'tailor')) return;
+      logError('tailor', err);
       logEvent('tailor', 502);
       res.status(502).json({ error: 'Tailoring failed. Please try again in a moment.' });
     }
@@ -290,6 +306,7 @@ function createApp(options = {}) {
       res.json({ result, beta: !!access.beta });
     } catch (err) {
       if (handleModelError(err, res, 'suggest')) return;
+      logError('suggest', err);
       logEvent('suggest', 502);
       res.status(502).json({ error: 'Suggestion generation failed. Please try again in a moment.' });
     }
@@ -328,6 +345,7 @@ function createApp(options = {}) {
       res.json({ result, beta: !!access.beta });
     } catch (err) {
       if (handleModelError(err, res, 'polish')) return;
+      logError('polish', err);
       logEvent('polish', 502);
       res.status(502).json({ error: 'Writing failed. Please try again in a moment.' });
     }
@@ -447,6 +465,7 @@ function createApp(options = {}) {
       const raw = await diagnoseCV(client, text.slice(0, 20000));
       const parsed = parseModelJson(raw);
       if (!parsed || typeof parsed.score !== 'number' || !Array.isArray(parsed.flags)) {
+        console.error(`${new Date().toISOString()} diagnose error: model returned an unexpected shape`);
         logEvent('diagnose', 502);
         return res.status(502).json({ error: 'CV check failed. Please try again in a moment.' });
       }
@@ -454,6 +473,7 @@ function createApp(options = {}) {
       res.json({ result: parsed, locked: 0, ai: true, beta: !!access.beta });
     } catch (err) {
       if (handleModelError(err, res, 'diagnose')) return;
+      logError('diagnose', err);
       logEvent('diagnose', 502);
       res.status(502).json({ error: 'CV check failed. Please try again in a moment.' });
     }
@@ -589,6 +609,7 @@ function createApp(options = {}) {
           });
         }
         if (handleModelError(err, res, 'keyword-gap')) return;
+        logError('keyword-gap', err);
         logEvent('keyword-gap', 502);
         return res.status(502).json({ error: 'Role insight failed. Please try again in a moment.' });
       }
@@ -611,6 +632,7 @@ function createApp(options = {}) {
       });
     } catch (err) {
       if (handleModelError(err, res, 'keyword-gap')) return;
+      logError('keyword-gap', err);
       logEvent('keyword-gap', 502);
       res.status(502).json({ error: 'Role insight failed. Please try again in a moment.' });
     }
@@ -669,6 +691,7 @@ function createApp(options = {}) {
       });
       const parsed = parseModelJson(raw);
       if (!parsed || typeof parsed.done !== 'boolean' || (!parsed.done && typeof parsed.next_question !== 'string')) {
+        console.error(`${new Date().toISOString()} interview error: model returned an unexpected shape`);
         logEvent('interview', 502);
         return res.status(502).json({ error: 'The interviewer lost their train of thought. Please try again.' });
       }
@@ -676,6 +699,7 @@ function createApp(options = {}) {
       res.json({ result: parsed, beta: !!access.beta });
     } catch (err) {
       if (handleModelError(err, res, 'interview')) return;
+      logError('interview', err);
       logEvent('interview', 502);
       res.status(502).json({ error: 'The interviewer lost their train of thought. Please try again.' });
     }
@@ -876,6 +900,7 @@ function createApp(options = {}) {
       res.json({ result, beta: !!access.beta, ai: true });
     } catch (err) {
       if (handleModelError(err, res, 'import-cv')) return;
+      logError('import-cv', err);
       logEvent('import-cv', 502);
       res.status(502).json({ error: 'Import failed. Please try again in a moment.' });
     }
