@@ -19,9 +19,20 @@
   }
   header.app-header{
     background:var(--accent);
-    color:#fff; padding:20px 32px; text-align:center;
+    color:#fff; padding:20px 32px; text-align:center; position:relative;
   }
   header.app-header h1{font-size:1.75rem; font-weight:700; letter-spacing:.4px;}
+  /* Unlock AI lives in the header (right side) so the upsell is visible on
+     every pane without crowding the tab row. Hidden unless the deploy is
+     paid-only and no licence key is in play — see setAILocked(). */
+  .hdr-unlock{
+    display:none; position:absolute; right:24px; top:50%; transform:translateY(-50%);
+    background:#fff; color:var(--accent); border:none; border-radius:20px;
+    padding:8px 16px; font-size:.82rem; font-weight:700; cursor:pointer; font-family:inherit;
+    box-shadow:0 2px 8px rgba(0,0,0,.18); white-space:nowrap; transition:transform .15s;
+  }
+  .hdr-unlock.show{display:inline-block;}
+  .hdr-unlock:hover{transform:translateY(-50%) scale(1.04);}
   .intro-strip{
     background:#fff; border-bottom:1px solid var(--line);
     padding:9px 28px; font-size:.83rem; color:var(--ink-soft); text-align:center;
@@ -209,8 +220,6 @@
      padlock; clicking one opens the subscribe panel instead of calling the API. */
   .ai-locked{opacity:.55; filter:grayscale(.4);}
   .ai-locked::after{content:" 🔒";}
-  .pm-btn.pm-unlock{flex:0 0 auto; display:none; background:var(--accent); border-color:var(--accent); color:#fff;}
-  .pm-btn.pm-unlock.show{display:inline-block;}
 
   /* ---------- template picker: slide-in drawer over the form pane ----------
      No backdrop — the live CV preview stays visible (and updating) on the
@@ -615,6 +624,9 @@
   }
   @media (max-width:560px){
     .start-note .sn-import{width:100%; text-align:center;}
+    /* Not enough header width to sit beside the title — drop below it. */
+    .hdr-unlock{position:static; transform:none; margin-top:8px;}
+    .hdr-unlock:hover{transform:scale(1.04);}
   }
 </style>
 </head>
@@ -622,6 +634,7 @@
 
 <header class="app-header">
   <h1>School-Leaver CV Builder <span style="font-weight:300">· UK Format</span></h1>
+  <button class="hdr-unlock" id="pmUnlock" onclick="openSubscribe()" title="Unlock every ✨ AI feature — £4.99/month, cancel any time">🔓 Unlock AI · £4.99/mo</button>
 </header>
 <div class="intro-strip">Answer the questions on the left — the CV builds itself on the right from <em>only</em> what you enter. Blank answers are left out, never invented. Export as PDF or Word when done.</div>
 
@@ -865,7 +878,6 @@
       <button class="pm-btn" id="pmTailor" onclick="setPane('tailor')" title="Sharpen your CV for one specific job advert">🎯 Match a job</button>
       <button class="pm-btn" id="pmReview" onclick="setPane('review')" title="Honest gaps in your CV and concrete actions to close them">🧭 Honest review</button>
       <button class="pm-btn" id="pmInterview" onclick="setPane('interview')" title="Practise a realistic interview for your target role">🎤 Mock interview</button>
-      <button class="pm-btn pm-unlock" id="pmUnlock" onclick="openSubscribe()" title="Unlock every ✨ AI feature — £4.99/month, cancel any time">🔓 Unlock AI · £4.99/mo</button>
     </div>
 
     <div class="tpl-modal" id="tplModal">
